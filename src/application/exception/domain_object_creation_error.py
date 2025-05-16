@@ -1,0 +1,2 @@
+class DomainObjectCreationError(Exception):
+    pass

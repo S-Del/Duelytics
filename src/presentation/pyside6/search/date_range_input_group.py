@@ -1,0 +1,53 @@
+from datetime import datetime
+from PySide6.QtWidgets import QFormLayout, QGroupBox, QLabel, QLineEdit
+from typing import ClassVar
+
+
+class DateRangeInputGroup(QGroupBox):
+    DATE_FORMAT: ClassVar[str] = "yyyy-MM-dd"
+
+    def __init__(self):
+        super().__init__("期間 入力")
+
+        label = QLabel("入力が無かった場合は全期間で検索")
+
+        since_label = QLabel("期間開始 年月日")
+        self.since_input = QLineEdit()
+        self.since_input.setPlaceholderText(DateRangeInputGroup.DATE_FORMAT)
+
+        until_label = QLabel("期間終了 年月日")
+        self.until_input = QLineEdit()
+        self.until_input.setPlaceholderText(DateRangeInputGroup.DATE_FORMAT)
+
+        layout = QFormLayout()
+        layout.addRow(label)
+        layout.addRow(since_label, self.since_input)
+        layout.addRow(until_label, self.until_input)
+
+        self.setLayout(layout)
+
+    def reset(self):
+        self.since_input.setText("")
+        self.until_input.setText("")
+
+    @property
+    def since(self) -> str | None:
+        since = self.since_input.text().strip()
+        if not since:
+            return None
+        try:
+            datetime.strptime(since, "%Y-%m-%d")
+        except ValueError:
+            return None
+        return since
+
+    @property
+    def until(self) -> str | None:
+        until = self.until_input.text().strip()
+        if not until:
+            return None
+        try:
+            datetime.strptime(until, "%Y-%m-%d")
+        except ValueError:
+            return None
+        return until

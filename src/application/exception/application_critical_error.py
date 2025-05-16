@@ -1,0 +1,2 @@
+class ApplicationCriticalError(Exception):
+    pass
