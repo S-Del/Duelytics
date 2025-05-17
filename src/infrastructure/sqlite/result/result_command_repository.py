@@ -34,8 +34,8 @@ class SQLiteResultCommandRepository(ResultCommandRepository):
             result.registered_at_isoformat,
             result.first_or_second_raw.value,
             result.result_raw.value,
-            result.my_deck_name,
-            result.opponent_deck_name
+            result.my_deck_name.value,
+            result.opponent_deck_name.value
         )
         self._logger.debug("\n".join([
             "register()",

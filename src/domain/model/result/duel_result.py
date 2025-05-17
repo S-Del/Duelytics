@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from domain.shared import Entity
-from . import FirstOrSecond, FirstOrSecondJP, ResultChar, ResultStringJP
-
+from domain.shared.unit import NonEmptyStr
+from . import FirstOrSecond, ResultChar
 
 # eq=False をしておかないと Entity で実装した __eq__ が上書きされてしまう
 @dataclass(frozen=True, eq=False)

@@ -16,6 +16,7 @@ from domain.repository import UnitOfWork
 from domain.repository.deck import DeckCommandRepository, DeckQueryRepository
 from domain.repository.note import NoteCommandRepository
 from domain.repository.result import ResultCommandRepository
+from domain.shared.unit import NonEmptyStr
 from . import RegisterResultCommand
 
 class RegisterResultScenario:
@@ -39,8 +40,8 @@ class RegisterResultScenario:
                 datetime.now(),
                 FirstOrSecond(command.first_or_second),
                 ResultChar(command.result),
-                command.my_deck_name,
-                command.opponent_deck_name
+                NonEmptyStr(command.my_deck_name),
+                NonEmptyStr(command.opponent_deck_name)
             )
         except (ValueError, TypeError) as e:
             # command 生成時にバリデーションされているので、
