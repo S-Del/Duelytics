@@ -67,8 +67,10 @@
 - PySide6 (Qt): LGPLv3 の下でライセンスされており、詳細は [LICENSE-LGPL-3.0](./LICENSE-LGPL-3.0) および [GNU LGPLv3公式サイト](https://www.gnu.org/licenses/lgpl-3.0.txt) を参照してください。
 - injector: BSD 3-Clause License の下でライセンスされています。詳細は同梱の [LICENSE-BSD-3-Clause](./LICENSE-BSD-3-Clause) を参照してください。
 
-また、テストには pytest (MIT License) を使用しました。
-- pytest: [公式サイト](https://docs.pytest.org)
+
+## 開発・ビルドツール
+- テストには pytest (MIT License) を使用しました。([公式サイト](https://docs.pytest.org))
+- アプリケーションの配布に当たり、exe ファイルの作成には PyInstaller (GPLv2 with Bootloader Exception) を使用しました ([公式サイト](https://pyinstaller.org/))。
 
 
 ## ライセンス
