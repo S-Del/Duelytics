@@ -11,13 +11,13 @@ class RecordFactory:
 
     def __init__(self, results: Sequence[DuelResult]):
         self.first_or_second_counter = Counter(
-            duel.first_or_second_raw for duel in results
+            duel.first_or_second for duel in results
         )
         self.result_counter = Counter(
-            duel.result_raw for duel in results
+            duel.result for duel in results
         )
         self.result_with_side_counter = Counter(
-            (duel.first_or_second_raw, duel.result_raw) for duel in results
+            (duel.first_or_second, duel.result) for duel in results
         )
 
     def create(self) -> Record:

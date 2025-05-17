@@ -5,7 +5,7 @@ from sqlite3 import Error as SQLiteError
 from application.exception import ApplicationCriticalError
 from application.result import IdForResult
 from domain.repository.result import ResultQueryRepository
-from . import FetchResultData
+from . import FetchResultData, ResultDataMapper
 
 
 class FetchResultById:
@@ -38,15 +38,4 @@ class FetchResultById:
             "ID での試合結果の検索完了",
             str(result)
         ]))
-
-        return FetchResultData(
-            result.id,
-            result.registered_at,
-            result.first_or_second.value,
-            result.first_or_second_raw.value,
-            result.result.value,
-            result.result_raw.value,
-            result.my_deck_name,
-            result.opponent_deck_name,
-            result.note
-        )
+        return ResultDataMapper().to_data(result)
