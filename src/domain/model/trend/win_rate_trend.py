@@ -23,7 +23,7 @@ class WinRateTrend:
         win_count = 0
         win_rate_trend: list[Percentage] = []
         for game_count, result in enumerate(self.results, 1):
-            if result.result_raw == ResultChar.WIN:
+            if result.result == ResultChar.WIN:
                 win_count += 1
             win_rate_trend.append(
                 Percentage.from_ratio(win_count / game_count)

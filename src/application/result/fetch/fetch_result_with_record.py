@@ -6,12 +6,11 @@ from logging import getLogger
 from sqlite3 import Error as SQLiteError
 
 from application.exception import ApplicationCriticalError
-from application.result.fetch.use_case import FetchResultData
+from application.result.fetch.use_case import ResultDataMapper
 from domain.model.deck import DeckDistribution
 from domain.model.record import RecordFactory, Record
-from domain.model.result import FirstOrSecond, ResultChar
-from domain.model.result.duel_result import DuelResult
-from domain.model.trend.win_rate_trend import WinRateTrend
+from domain.model.result import FirstOrSecond, ResultChar, DuelResult
+from domain.model.trend import WinRateTrend
 from domain.repository.result import FetchResultQuery, ResultQueryRepository
 from domain.repository.result.exception import RepositoryDataError
 from . import FetchResultRequest, FetchResultResponse, RecordData
@@ -22,19 +21,6 @@ class FetchResultWithRecord:
     def __init__(self, repository: ResultQueryRepository):
         self.repository = repository
         self._logger = getLogger()
-
-    def _convert_to_result_data(self, result: DuelResult) -> FetchResultData:
-        return FetchResultData(
-            result.id,
-            result.registered_at,
-            result.first_or_second.value,
-            result.first_or_second_raw.value,
-            result.result.value,
-            result.result_raw.value,
-            result.my_deck_name,
-            result.opponent_deck_name,
-            result.note
-        )
 
     def _convert_to_record_data(self, record: Record) -> RecordData:
         return RecordData(
@@ -66,7 +52,7 @@ class FetchResultWithRecord:
             record = RecordFactory([result]).create()
             self._logger.info(f"ID での検索完了")
             return FetchResultResponse(
-                [self._convert_to_result_data(result)],
+                ResultDataMapper().to_data_list([result]),
                 self._convert_to_record_data(record),
                 DeckDistribution([result]).aggregate(),
                 self._convert_to_trend_data([result])
@@ -155,7 +141,7 @@ class FetchResultWithRecord:
         self._logger.info(f"試合結果の検索が完了 ({len(results)} 件)")
 
         return FetchResultResponse(
-            [self._convert_to_result_data(result) for result in results],
+            ResultDataMapper().to_data_list(results),
             self._convert_to_record_data(RecordFactory(results).create()),
             DeckDistribution(results).aggregate(),
             self._convert_to_trend_data(results)
