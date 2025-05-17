@@ -1,7 +1,8 @@
 # Duelytics
 ![image](https://gitlab.com/-/project/69909365/uploads/49c9b4fe442cbfeeeb67bf325eca36df/image.png)  
 遊戯王マスターデュエルの試合結果記録用デスクトップアプリ  
-記録された試合結果から、戦績サマリーやデッキ分布なども確認できます。
+記録された試合結果から、戦績サマリーやデッキ分布なども確認できます。  
+
 ＞＞ [ダウンロードはこちら](https://gitlab.com/-/project/69909365/uploads/c728266eeaa5a846b109cb592577b351/duelytics-v1-0-beta.zip) ＜＜
 
 
