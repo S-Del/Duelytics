@@ -1,5 +1,5 @@
 # Duelytics
-![image](https://gitlab.com/-/project/69909365/uploads/49c9b4fe442cbfeeeb67bf325eca36df/image.png)  
+![image](https://gitlab.com/-/project/69909365/uploads/335d49bc44341ae72b4f1059381303a7/image.png)  
 遊戯王マスターデュエルの試合結果記録用デスクトップアプリ  
 記録された試合結果から、戦績サマリーやデッキ分布なども確認できます。  
 
@@ -25,6 +25,7 @@
 
 ## 基本的な使い方
 ### 「登録」タブ
+![登録タブの画像](https://gitlab.com/-/project/69909365/uploads/f4192f23da2cb8f28bc4b0d8600920e0/image.png)  
 試合結果を登録できます。
 「先攻/後攻の選択」「勝敗分の選択」「自分のデッキ名」以外の入力項目は任意入力です。  
 
@@ -44,6 +45,7 @@
 
 もちろん完全一致でのデッキ名検索も可能です。
 ### 「検索」タブ
+![検索タブの画像](https://gitlab.com/-/project/69909365/uploads/e04a400e123b26ac1c33bd7b25431129/image.png)  
 勝敗やデッキ名、日時などの様々な条件でフィルタリングしながら検索できます。  
 検索結果ウィンドウには、その検索結果一覧に加え、
 - 「戦績」
@@ -51,6 +53,7 @@
 - 「相手デッキ分布」
 等も表示されるので、環境の把握などに使用できると思います。
 ### 「編集・削除」タブ
+![編集・削除タブの画像](https://gitlab.com/-/project/69909365/uploads/9447a7568c01f1a7d58af2d8c9718ef8/image.png)  
 試合結果の ID を入力して取得し、その試合結果を編集したり削除したりできます。  
 試合結果 ID は、検索結果ウィンドウ内の表内から目的の試合の ID を選択し、
 <kbd><kbd>Ctrl</kbd>+<kbd>C</kbd></kbd> や <kbd><kbd>Ctrl</kbd>+<kbd>Ins</kbd></kbd>
