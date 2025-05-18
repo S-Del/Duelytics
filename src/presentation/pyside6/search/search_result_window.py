@@ -19,7 +19,6 @@ class SearchResultWindow(QMainWindow):
         super().__init__(parent)
 
         self.setWindowTitle("検索結果")
-        self.setMinimumSize(768, 768)
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)

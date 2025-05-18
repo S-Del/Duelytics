@@ -13,7 +13,6 @@ from application.exception import (
 from domain.model.note import Note
 from domain.model.result import DuelResult, FirstOrSecond, ResultChar
 from domain.repository import UnitOfWork
-from domain.repository.deck import DeckCommandRepository, DeckQueryRepository
 from domain.repository.note import NoteCommandRepository
 from domain.repository.result import ResultCommandRepository
 from domain.shared.unit import NonEmptyStr
