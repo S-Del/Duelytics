@@ -134,5 +134,6 @@ class Tab(QWidget):
         search_result_window.update_table(
             SearchResultTableModel(fetch_result.data_list)
         )
-        search_result_window.showMaximized()
+        search_result_window.resize(1280, 720)
+        search_result_window.show()
         self.search_result_windows.append(search_result_window)
