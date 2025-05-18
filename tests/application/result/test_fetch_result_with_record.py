@@ -2,9 +2,7 @@ from datetime import date
 from uuid import UUID, uuid4
 
 from application.result.fetch import FetchResultWithRecord
-from domain.model.result import DuelResult
-from domain.model.result.first_or_second import FirstOrSecond
-from domain.model.result.result_string import ResultChar
+from domain.model.result import FirstOrSecond, ResultChar, DuelResult
 from domain.repository.result import FetchResultQuery, ResultQueryRepository
 
 

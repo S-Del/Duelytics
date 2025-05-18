@@ -4,6 +4,8 @@ from typing import Type
 from uuid import uuid4
 
 from pytest import fail
+
+from domain.shared.unit import NonEmptyStr
 from domain.model.result import DuelResult, FirstOrSecond, ResultChar
 from domain.repository import UnitOfWork
 
@@ -11,8 +13,8 @@ from domain.repository import UnitOfWork
 def make_result(
     first_or_second: FirstOrSecond,
     result: ResultChar,
-    my_deck_name: str = "MY_DECK_NAME",
-    opponent_deck_name: str = "OPPONENT_DECK_NAME",
+    my_deck_name = NonEmptyStr("MY_DECK_NAME"),
+    opponent_deck_name = NonEmptyStr("OPPONENT_DECK_NAME"),
     registered_at: datetime | None = None,
     note: str | None = None
 ) -> DuelResult:

@@ -7,6 +7,7 @@ from .date_range_input_group import DateRangeInputGroup
 from .keyword_input_group import KeywordInputGroup
 from .control_button_group import ControlButtonGroup
 from .serach_result_table_model import SearchResultTableModel
+from .search_result_table import SearchResultTableGroup
 from .display_record_group import DisplayRecordGroup
 from .deck_distribution_group import DeckDistributionGroup
 from .win_rate_trend_group import WinRateTrendGroup
