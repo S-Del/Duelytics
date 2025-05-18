@@ -6,6 +6,7 @@ from logging import getLogger
 from sqlite3 import Error as SQLiteError
 
 from application.exception import ApplicationCriticalError
+from application.result.fetch import DistributionDataMapper
 from application.result.fetch.use_case import ResultDataMapper
 from domain.model.deck import DeckDistribution
 from domain.model.record import RecordFactory, Record
@@ -51,10 +52,12 @@ class FetchResultWithRecord:
                 return None
             record = RecordFactory([result]).create()
             self._logger.info(f"ID での検索完了")
+            mapper = DistributionDataMapper(DeckDistribution([result]))
             return FetchResultResponse(
                 ResultDataMapper().to_data_list([result]),
                 self._convert_to_record_data(record),
-                DeckDistribution([result]).aggregate(),
+                mapper.top_n_with_other(),
+                mapper.top_n_with_other(),
                 self._convert_to_trend_data([result])
             )
         except ValueError:
@@ -139,10 +142,11 @@ class FetchResultWithRecord:
             return None
 
         self._logger.info(f"試合結果の検索が完了 ({len(results)} 件)")
-
+        mapper = DistributionDataMapper(DeckDistribution(results))
         return FetchResultResponse(
             ResultDataMapper().to_data_list(results),
             self._convert_to_record_data(RecordFactory(results).create()),
-            DeckDistribution(results).aggregate(),
+            mapper.top_n_with_other(),
+            mapper.top_n_with_other(10),
             self._convert_to_trend_data(results)
         )
