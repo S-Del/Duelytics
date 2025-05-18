@@ -11,6 +11,7 @@ from domain.repository.result import (
     FetchResultQuery,
     ResultQueryRepository
 )
+from domain.shared.unit import NonEmptyStr
 from infrastructure.sqlite.config import DatabaseConfig
 from infrastructure.sqlite.config.table import (
     ResultTableConfig,
@@ -37,8 +38,10 @@ class SQLiteResultQueryRepository(ResultQueryRepository):
                     ResultTableConfig.COLUMN_NAMES.FIRST_OR_SECOND
                 ]),
                 ResultChar(row[ResultTableConfig.COLUMN_NAMES.RESULT]),
-                row[ResultTableConfig.COLUMN_NAMES.MY_DECK_NAME],
-                row[ResultTableConfig.COLUMN_NAMES.OPPONENT_DECK_NAME],
+                NonEmptyStr(row[ResultTableConfig.COLUMN_NAMES.MY_DECK_NAME]),
+                NonEmptyStr(
+                    row[ResultTableConfig.COLUMN_NAMES.OPPONENT_DECK_NAME]
+                ),
                 row[NoteTableConfig.COLUMN_NAMES.NOTE]
             )
         except (KeyError, TypeError, ValueError) as e:

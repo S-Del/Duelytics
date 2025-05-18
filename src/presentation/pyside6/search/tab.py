@@ -124,8 +124,9 @@ class Tab(QWidget):
 
         search_result_window = SearchResultWindow(self)
         search_result_window.update_record(fetch_result.record)
-        search_result_window.update_distribution(
-            fetch_result.deck_distribution
+        search_result_window.update_distribution_charts(
+            fetch_result.distribution_for_pie,
+            fetch_result.distribution_for_h_bar
         )
         search_result_window.update_win_rate_trend(
             fetch_result.win_rate_trend_data
@@ -133,5 +134,6 @@ class Tab(QWidget):
         search_result_window.update_table(
             SearchResultTableModel(fetch_result.data_list)
         )
-        search_result_window.showMaximized()
+        search_result_window.resize(1280, 720)
+        search_result_window.show()
         self.search_result_windows.append(search_result_window)

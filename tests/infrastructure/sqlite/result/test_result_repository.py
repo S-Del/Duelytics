@@ -4,6 +4,7 @@ from pytest import fixture
 
 from domain.model.result import FirstOrSecond, ResultChar
 from domain.repository.result import FetchResultQuery, UpdateResultCommand
+from domain.shared.unit import NonEmptyStr
 from infrastructure.sqlite import SQLiteUnitOfWork
 from infrastructure.sqlite.config import DatabaseConfig
 from infrastructure.sqlite.config.table import ResultTableConfig
@@ -61,8 +62,8 @@ def test_crud_flow(
     assert searched is not None
     # Entity に定義した __eq__ (ID) による同一性検証
     assert searched == result
-    # NoteRepository を介していないのでかならず "" (空文字列) となる
-    assert searched.note == ""
+    # NoteRepository を介していないのでかならず None となる
+    assert searched.note == None
 
     # 更新
     changed_side = FirstOrSecond.SECOND
@@ -82,10 +83,10 @@ def test_crud_flow(
     searched = query_repository.search_by_id(result.id_raw)
     assert searched is not None
     assert searched == result
-    assert searched.first_or_second_raw == changed_side
-    assert searched.result_raw == changed_result
-    assert searched.my_deck_name == changed_deck_name
-    assert searched.opponent_deck_name == changed_deck_name
+    assert searched.first_or_second == changed_side
+    assert searched.result == changed_result
+    assert searched.my_deck_name == NonEmptyStr(changed_deck_name)
+    assert searched.opponent_deck_name == NonEmptyStr(changed_deck_name)
 
     # 削除
     with uow:
@@ -105,27 +106,27 @@ def insert_test_data(
     results = (
         make_result(
             FirstOrSecond.FIRST, ResultChar.WIN,
-            "メタビート", "ティアラメンツ",
+            NonEmptyStr("メタビート"), NonEmptyStr("ティアラメンツ"),
             datetime.fromisoformat("2023-01-01")
         ),
         make_result(
             FirstOrSecond.SECOND, ResultChar.LOSS,
-            "ドラゴンリンク", "ふわんだりぃず",
+            NonEmptyStr("ドラゴンリンク"), NonEmptyStr("ふわんだりぃず"),
             datetime.fromisoformat("2024-01-01")
         ),
         make_result(
             FirstOrSecond.FIRST, ResultChar.LOSS,
-            "ドラゴンリンク", "ティアラメンツ",
+            NonEmptyStr("ドラゴンリンク"), NonEmptyStr("ティアラメンツ"),
             datetime.fromisoformat("2024-01-01")
         ),
         make_result(
             FirstOrSecond.SECOND, ResultChar.WIN,
-            "メタビート", "ふわんだりぃず",
+            NonEmptyStr("メタビート"), NonEmptyStr("ふわんだりぃず"),
             datetime.fromisoformat("2024-01-01")
         ),
         make_result(
             FirstOrSecond.SECOND, ResultChar.DRAW,
-            "ラビュリンス", "クシャトリラ",
+            NonEmptyStr("ラビュリンス"), NonEmptyStr("クシャトリラ"),
             datetime.fromisoformat("2025-01-01")
         )
     )
