@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 from application.result.fetch import FetchResultWithRecord
 from domain.model.result import FirstOrSecond, ResultChar, DuelResult
 from domain.repository.result import FetchResultQuery, ResultQueryRepository
+from domain.shared.unit import NonEmptyStr
 
 
 class SpyResultQueryRepository(ResultQueryRepository):
@@ -65,9 +66,9 @@ def test_builds_correct_fetch_query():
     assert query is not None
     assert query.get("first_or_second") == [FirstOrSecond.FIRST]
     assert query.get("result") == [ResultChar.WIN]
-    assert query.get("my_deck_name") == "my_deck_name"
+    assert query.get("my_deck_name") == NonEmptyStr("my_deck_name")
     assert query.get("my_deck_name_search_type") == "exact"
-    assert query.get("opponent_deck_name") == "opponent_deck_name"
+    assert query.get("opponent_deck_name") == NonEmptyStr("opponent_deck_name")
     assert query.get("opponent_deck_name_search_type") == "exact"
     assert query.get("since") == date.fromisoformat("2025-05-14")
     assert query.get("until") == date.fromisoformat("2025-05-14")
