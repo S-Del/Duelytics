@@ -4,7 +4,7 @@ from pytest import fixture
 
 from domain.model.result import FirstOrSecond, ResultChar
 from domain.repository.result import FetchResultQuery, UpdateResultCommand
-from domain.shared.unit import NonEmptyStr
+from domain.shared.unit import NonEmptyStr, PositiveInt
 from infrastructure.sqlite import SQLiteUnitOfWork
 from infrastructure.sqlite.config import DatabaseConfig
 from infrastructure.sqlite.config.table import ResultTableConfig
@@ -170,11 +170,11 @@ def test_search_query(
     })
     assert len(results_draw) == 1
     results_labrynth = query_repository.search({
-        "my_deck_name": "ラビュリンス"
+        "my_deck_name": NonEmptyStr("ラビュリンス")
     })
     assert len(results_labrynth) == 1
     results_kashtira = query_repository.search({
-        "opponent_deck_name": "クシャトリラ"
+        "opponent_deck_name": NonEmptyStr("クシャトリラ")
     })
     assert len(results_kashtira) == 1
     # テストデータではラビュとクシャの試合それぞれ 1 試合のみで、
@@ -187,32 +187,32 @@ def test_search_query(
     # search_type を指定しない場合はデフォルトで exact の検索となる。
     # 先ほどのケースで検証済みのため、ここではテストはしない。
     results = query_repository.search({
-        "my_deck_name": "メタビ",
+        "my_deck_name": NonEmptyStr("メタビ"),
         "my_deck_name_search_type": "prefix"
     })
     assert len(results) == 2
     results = query_repository.search({
-        "my_deck_name": "ート",
+        "my_deck_name": NonEmptyStr("ート"),
         "my_deck_name_search_type": "suffix"
     })
     assert len(results) == 2
     results = query_repository.search({
-        "my_deck_name": "タビー",
+        "my_deck_name": NonEmptyStr("タビー"),
         "my_deck_name_search_type": "partial"
     })
     assert len(results) == 2
     results = query_repository.search({
-        "opponent_deck_name": "ティアラ",
+        "opponent_deck_name": NonEmptyStr("ティアラ"),
         "opponent_deck_name_search_type": "prefix"
     })
     assert len(results) == 2
     results = query_repository.search({
-        "opponent_deck_name": "メンツ",
+        "opponent_deck_name": NonEmptyStr("メンツ"),
         "opponent_deck_name_search_type": "suffix"
     })
     assert len(results) == 2
     results = query_repository.search({
-        "opponent_deck_name": "アラメ",
+        "opponent_deck_name": NonEmptyStr("アラメ"),
         "opponent_deck_name_search_type": "partial"
     })
     assert len(results) == 2
@@ -242,8 +242,8 @@ def test_search_query(
     # 有利対面もしくは不利対面としての懸念がある場合に、
     # 実際の状況を把握する場合に使用されると思われる。
     results = query_repository.search({
-        "my_deck_name": "メタビート",
-        "opponent_deck_name": "ふわんだりぃず"
+        "my_deck_name": NonEmptyStr("メタビート"),
+        "opponent_deck_name": NonEmptyStr("ふわんだりぃず")
     })
     assert len(results) == 1
 
@@ -252,7 +252,7 @@ def test_search_query(
     # 自分のデッキ内容に変更があった場合は、
     # 特定の日付 (デッキ変更) 以降の試合結果を検索したい場合がある。
     results = query_repository.search({
-        "my_deck_name": "ラビュリンス",
+        "my_deck_name": NonEmptyStr("ラビュリンス"),
         "since": date.fromisoformat("2025-01-01")
     })
     assert len(results) == 1
@@ -264,17 +264,17 @@ def test_search_query(
     results = query_repository.search({
         "first_or_second": [FirstOrSecond.FIRST],
         "result": [ResultChar.LOSS],
-        "my_deck_name": "ドラゴンリンク"
+        "my_deck_name": NonEmptyStr("ドラゴンリンク")
     })
     assert len(results) == 1
 
     # 以下は異常系
     results = query_repository.search({
-        "my_deck_name": "存在しないデッキ名"
+        "my_deck_name": NonEmptyStr("存在しないデッキ名")
     })
     assert len(results) == 0
     results = query_repository.search({
-        "opponent_deck_name": "存在しないデッキ名"
+        "opponent_deck_name": NonEmptyStr("存在しないデッキ名")
     })
     assert len(results) == 0
     results = query_repository.search({

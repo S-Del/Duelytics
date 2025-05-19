@@ -97,7 +97,7 @@ class SearchConditionBuilder:
         if my_deck_name:
             self.add_like(
                 ResultTableConfig.COLUMN_NAMES.MY_DECK_NAME,
-                my_deck_name,
+                my_deck_name.value,
                 query.get("my_deck_name_search_type") or "exact"
             )
 
@@ -105,7 +105,7 @@ class SearchConditionBuilder:
         if opponent_deck_name:
             self.add_like(
                 ResultTableConfig.COLUMN_NAMES.OPPONENT_DECK_NAME,
-                opponent_deck_name,
+                opponent_deck_name.value,
                 query.get("opponent_deck_name_search_type") or "exact"
             )
 
