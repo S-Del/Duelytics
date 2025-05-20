@@ -7,13 +7,13 @@ from typing import ClassVar
 from application.deck.fetch.use_case import FetchAllDeckName
 from application.exception import ApplicationCriticalError
 from application.result.fetch import FetchResultRequest, FetchResultWithRecord
+from .advanced_search import AdvancedSearchGroup
 from . import (
     IdInputGroup,
     FirstOrSecondCheckboxGroup,
     ResultCheckboxGroup,
     DeckNameInputGroup,
     DateRangeInputGroup,
-    KeywordInputGroup,
     ControlButtonGroup,
     SearchResultTableModel,
     SearchResultWindow
@@ -40,7 +40,7 @@ class Tab(QWidget):
             self.update_completer_deck_list
         )
         self.date_range_input_group = DateRangeInputGroup()
-        self.keyword_input_group = KeywordInputGroup()
+        self.advanced_search_group = AdvancedSearchGroup()
         self.control_button_group = ControlButtonGroup(
             self.on_click_search_button,
             self.on_click_clear_button
@@ -58,7 +58,7 @@ class Tab(QWidget):
         layout.addWidget(self.first_or_second_checkbox_group, 1, 0)
         layout.addWidget(self.result_checkbox_group, 1, 1)
         layout.addWidget(self.deck_name_input_group, 1, 2)
-        layout.addWidget(self.keyword_input_group, 2, 0, 1, 3)
+        layout.addWidget(self.advanced_search_group, 2, 0, 1, 3)
         layout.addWidget(self.control_button_group, 3, 0, 1, 3)
         self.setLayout(layout)
 
@@ -82,7 +82,7 @@ class Tab(QWidget):
         self.result_checkbox_group.reset()
         self.deck_name_input_group.reset()
         self.date_range_input_group.reset()
-        self.keyword_input_group.reset()
+        self.advanced_search_group.reset()
 
     def on_click_search_button(self):
         request: FetchResultRequest = {}
@@ -106,6 +106,7 @@ class Tab(QWidget):
             request["since"] = self.date_range_input_group.since
         if self.date_range_input_group.until:
             request["until"] = self.date_range_input_group.until
+        request["limit"] = self.advanced_search_group.limit
 
         try:
             fetch_result = self.fetch_result_with_record.handle(request)

@@ -5,7 +5,9 @@ from injector import inject
 from logging import getLogger
 from sqlite3 import Error as SQLiteError
 
-from application.exception import ApplicationCriticalError
+from application.exception import (
+    ApplicationCriticalError, DomainObjectCreationError
+)
 from application.result.fetch import DistributionDataMapper
 from application.result.fetch.use_case import ResultDataMapper
 from domain.model.deck import DeckDistribution
@@ -14,6 +16,7 @@ from domain.model.result import FirstOrSecond, ResultChar, DuelResult
 from domain.model.trend import WinRateTrend
 from domain.repository.result import FetchResultQuery, ResultQueryRepository
 from domain.repository.result.exception import RepositoryDataError
+from domain.shared.unit import NonEmptyStr, PositiveInt
 from . import FetchResultRequest, FetchResultResponse, RecordData
 
 
@@ -84,21 +87,25 @@ class FetchResultWithRecord:
                 query["first_or_second"] = [
                     FirstOrSecond(char) for char in first_or_second
                 ]
-            except ValueError:
+            except ValueError as ve:
                 self._logger.error(f"先攻/後攻の値が不正: {first_or_second}")
-                raise
+                raise DomainObjectCreationError from ve
 
         result = request.get("result")
         if result:
             try:
                 query["result"] = [ResultChar(char) for char in result]
-            except ValueError:
+            except ValueError as ve:
                 self._logger.error(f"試合結果の値が不正: {result}")
-                raise
+                raise DomainObjectCreationError from ve
 
         my_deck_name = request.get("my_deck_name")
         if my_deck_name:
-            query["my_deck_name"] = my_deck_name
+            try:
+                query["my_deck_name"] = NonEmptyStr(my_deck_name)
+            except ValueError as ve:
+                self._logger.error(f"自分デッキ名の指定が不正: {my_deck_name}")
+                raise DomainObjectCreationError from ve
             search_type = request.get("my_deck_name_search_type")
             if not search_type:
                 raise KeyError("自分のデッキ名の検索タイプの指定が無い")
@@ -106,7 +113,13 @@ class FetchResultWithRecord:
 
         opponent_deck_name = request.get("opponent_deck_name")
         if opponent_deck_name:
-            query["opponent_deck_name"] = opponent_deck_name
+            try:
+                query["opponent_deck_name"] = NonEmptyStr(opponent_deck_name)
+            except ValueError as ve:
+                self._logger.error(
+                    f"相手デッキ名の指定が不正: {opponent_deck_name}"
+                )
+                raise DomainObjectCreationError from ve
             search_type = request.get("opponent_deck_name_search_type")
             if not search_type:
                 raise KeyError("相手デッキ名の検索タイプの指定が無い")
@@ -129,6 +142,14 @@ class FetchResultWithRecord:
                 raise
 
         query["order"] = request.get("order") or "DESC"
+
+        limit = request.get("limit")
+        if limit:
+            try:
+                query["limit"] = PositiveInt(limit)
+            except ValueError as ve:
+                self._logger.error(f"取得件数の指定が不正: {limit}")
+                raise DomainObjectCreationError from ve
 
         self._logger.info("試合結果の検索開始")
 

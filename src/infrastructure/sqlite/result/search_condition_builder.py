@@ -78,7 +78,7 @@ class SearchConditionBuilder:
         self.params.append(date_time_str)
         return self
 
-    def build(self, query: FetchResultQuery) -> tuple[str, tuple[Any]]:
+    def build(self, query: FetchResultQuery) -> tuple[str, list[Any]]:
         first_or_second = query.get("first_or_second")
         if first_or_second:
             self.add_in(
@@ -97,7 +97,7 @@ class SearchConditionBuilder:
         if my_deck_name:
             self.add_like(
                 ResultTableConfig.COLUMN_NAMES.MY_DECK_NAME,
-                my_deck_name,
+                my_deck_name.value,
                 query.get("my_deck_name_search_type") or "exact"
             )
 
@@ -105,7 +105,7 @@ class SearchConditionBuilder:
         if opponent_deck_name:
             self.add_like(
                 ResultTableConfig.COLUMN_NAMES.OPPONENT_DECK_NAME,
-                opponent_deck_name,
+                opponent_deck_name.value,
                 query.get("opponent_deck_name_search_type") or "exact"
             )
 
@@ -124,10 +124,12 @@ class SearchConditionBuilder:
             )
 
         if not self.conditions:
-            return ("", tuple())
+            return ("", [])
 
         where_clause = " WHERE " + " AND ".join(self.conditions)
-        params = tuple(self.params)
+#       params はイミュータブルな要素しか持たないため、シャローコピーで充分。
+#       params = deepcopy(self.params)
+        params = list(self.params)
         self.conditions.clear()
         self.params.clear()
         return where_clause, params

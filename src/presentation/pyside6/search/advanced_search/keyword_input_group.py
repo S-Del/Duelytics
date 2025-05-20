@@ -4,9 +4,9 @@ from re import split
 
 class KeywordInputGroup(QGroupBox):
     def __init__(self):
-        super().__init__("キーワード 入力")
+        super().__init__("キーワード 指定")
 
-        label = QLabel("入力されたキーワードがメモに記入された試合のみ検索")
+        label = QLabel("メモに入力されたキーワードが記入された試合のみ検索")
         self.line_edit = QLineEdit()
 
         # ToDo: 実装後に削除

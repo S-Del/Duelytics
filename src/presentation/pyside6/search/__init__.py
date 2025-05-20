@@ -4,7 +4,6 @@ from .result_checkbox_group import ResultCheckboxGroup
 from .search_type_radio_group import SearchTypeRadioGroup
 from .deck_name_input_group import DeckNameInputGroup
 from .date_range_input_group import DateRangeInputGroup
-from .keyword_input_group import KeywordInputGroup
 from .control_button_group import ControlButtonGroup
 from .serach_result_table_model import SearchResultTableModel
 from .search_result_table import SearchResultTableGroup
