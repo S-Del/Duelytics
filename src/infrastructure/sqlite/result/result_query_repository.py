@@ -96,14 +96,20 @@ class SQLiteResultQueryRepository(ResultQueryRepository):
 
         where_clause, params = self._builder.build(query)
 
-        sql = " ".join([
+        sql_parts = [
             f"SELECT * FROM {ResultTableConfig.TABLE_NAME}",
             f"LEFT JOIN {NoteTableConfig.TABLE_NAME}",
             f"ON {result_id_qualified} = {note_id_qualified}",
             where_clause,
             f"ORDER BY {ResultTableConfig.COLUMN_NAMES.REGISTER_DATE}",
             f"{query.get('order') or 'DESC'}"
-        ])
+        ]
+        limit = query.get("limit")
+        if limit:
+            sql_parts.append(f"LIMIT ?")
+            params.append(limit.value)
+
+        sql = " ".join(sql_parts)
 
         self._logger.debug("\n".join([
             f"search()",

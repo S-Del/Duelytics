@@ -15,3 +15,4 @@ class FetchResultQuery(TypedDict, total=False):
     since: date
     until: date
     order: Literal["DESC", "ASC"]
+    limit: PositiveInt
