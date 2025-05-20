@@ -106,6 +106,7 @@ class Tab(QWidget):
             request["since"] = self.date_range_input_group.since
         if self.date_range_input_group.until:
             request["until"] = self.date_range_input_group.until
+        request["order"] = self.date_range_input_group.order_by
         request["limit"] = self.advanced_search_group.limit
 
         try:

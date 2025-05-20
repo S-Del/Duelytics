@@ -1,6 +1,8 @@
 from datetime import datetime
 from PySide6.QtWidgets import QFormLayout, QGroupBox, QLabel, QLineEdit
-from typing import ClassVar
+from typing import ClassVar, Literal
+
+from presentation.pyside6.search import SortByDateRadioGroup
 
 
 class DateRangeInputGroup(QGroupBox):
@@ -19,16 +21,20 @@ class DateRangeInputGroup(QGroupBox):
         self.until_input = QLineEdit()
         self.until_input.setPlaceholderText(DateRangeInputGroup.DATE_FORMAT)
 
+        self.sort_radio = SortByDateRadioGroup()
+
         layout = QFormLayout()
         layout.addRow(label)
         layout.addRow(since_label, self.since_input)
         layout.addRow(until_label, self.until_input)
+        layout.addRow(self.sort_radio)
 
         self.setLayout(layout)
 
     def reset(self):
         self.since_input.setText("")
         self.until_input.setText("")
+        self.sort_radio.reset()
 
     @property
     def since(self) -> str | None:
@@ -51,3 +57,7 @@ class DateRangeInputGroup(QGroupBox):
         except ValueError:
             return None
         return until
+
+    @property
+    def order_by(self) -> Literal["DESC", "ASC"]:
+        return self.sort_radio.order_by
