@@ -235,6 +235,12 @@ def test_search_query(
     # よって、テストデータ 3 件全てを取得できていなければならない。
     assert len(results) == 3
 
+    # LIMIT 句
+    results = query_repository.search({
+        "limit": PositiveInt(1)
+    })
+    assert len(results) == 1
+
     # 全ての検索条件の組み合わせを網羅することは不可能なので、
     # 以下では、よく使われると思われる検索条件の組み合わせでテストを行う。
 

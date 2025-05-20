@@ -14,3 +14,4 @@ class FetchResultRequest(TypedDict, total=False):
     since: str
     until: str
     order: Literal["DESC", "ASC"]
+    limit: int

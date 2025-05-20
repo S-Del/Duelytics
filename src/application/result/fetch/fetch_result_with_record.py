@@ -143,6 +143,14 @@ class FetchResultWithRecord:
 
         query["order"] = request.get("order") or "DESC"
 
+        limit = request.get("limit")
+        if limit:
+            try:
+                query["limit"] = PositiveInt(limit)
+            except ValueError as ve:
+                self._logger.error(f"取得件数の指定が不正: {limit}")
+                raise DomainObjectCreationError from ve
+
         self._logger.info("試合結果の検索開始")
 
         try:
