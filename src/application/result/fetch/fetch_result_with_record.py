@@ -1,5 +1,4 @@
 from datetime import date
-from typing import Sequence
 from uuid import UUID
 from injector import inject
 from logging import getLogger
@@ -12,7 +11,7 @@ from application.result.fetch import DistributionDataMapper
 from application.result.fetch.use_case import ResultDataMapper
 from domain.model.deck import DeckDistribution
 from domain.model.record import RecordFactory, Record
-from domain.model.result import FirstOrSecond, ResultChar, DuelResult
+from domain.model.result import FirstOrSecond, ResultChar
 from domain.model.trend import WinRateTrend
 from domain.repository.result import FetchResultQuery, ResultQueryRepository
 from domain.repository.result.exception import RepositoryDataError
@@ -41,12 +40,6 @@ class FetchResultWithRecord:
             str(record.second_win_rate)
         )
 
-    def _convert_to_trend_data(self,
-        results: Sequence[DuelResult]
-    ) -> list[float]:
-        percentages = WinRateTrend(list(reversed(results))).aggregate()
-        return [percentage.value for percentage in percentages]
-
     def _fetch_by_id(self, id: str | None) -> FetchResultResponse | None:
         self._logger.info(f"ID での検索を開始: {id}")
         try:
@@ -56,12 +49,13 @@ class FetchResultWithRecord:
             record = RecordFactory([result]).create()
             self._logger.info(f"ID での検索完了")
             mapper = DistributionDataMapper(DeckDistribution([result]))
+            trend = WinRateTrend([result]).aggregate()
             return FetchResultResponse(
                 ResultDataMapper().to_data_list([result]),
                 self._convert_to_record_data(record),
                 mapper.top_n_with_other(),
                 mapper.top_n_with_other(),
-                self._convert_to_trend_data([result])
+                [percentage.value for percentage in trend]
             )
         except ValueError:
             self._logger.error(f"指定された ID の形式が不正: {id}")
@@ -160,14 +154,21 @@ class FetchResultWithRecord:
             raise ApplicationCriticalError from e
 
         if not results:
+            self._logger.info("検索結果無し")
             return None
 
         self._logger.info(f"試合結果の検索が完了 ({len(results)} 件)")
+
         mapper = DistributionDataMapper(DeckDistribution(results))
+        if query["order"] == "DESC":
+            trend = WinRateTrend(list(reversed(results))).aggregate()
+        else:
+            trend = WinRateTrend(results).aggregate()
+
         return FetchResultResponse(
             ResultDataMapper().to_data_list(results),
             self._convert_to_record_data(RecordFactory(results).create()),
             mapper.top_n_with_other(),
             mapper.top_n_with_other(10),
-            self._convert_to_trend_data(results)
+            [percentage.value for percentage in trend]
         )
