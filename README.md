@@ -3,7 +3,7 @@
 遊戯王マスターデュエルの試合結果記録用デスクトップアプリ  
 記録された試合結果から、戦績サマリーやデッキ分布なども確認できます。  
 
-＞＞ [ダウンロードはこちら](https://gitlab.com/-/project/69909365/uploads/682f367e4869519bc7d57d289708ae41/duelytics-v1.0-beta4.zip) ＜＜
+＞＞ [ダウンロードはこちら](https://gitlab.com/-/project/69909365/uploads/be2e2203c6740f4d42ebaa38bc30ccd8/duelytics-v1.0-beta5.zip) ＜＜
 
 
 ## 主な機能
@@ -17,7 +17,7 @@
 ## ダウンロード / 実行方法
 以下のリンクか [リリースページ](https://gitlab.com/S-Del/duelytics/-/releases) からダウンロードし、
 解凍して出てくるフォルダ内の `Duelytics.exe` を実行してください。
-- [ダウンロードリンク](https://gitlab.com/-/project/69909365/uploads/682f367e4869519bc7d57d289708ae41/duelytics-v1.0-beta4.zip)
+- [ダウンロードリンク](https://gitlab.com/-/project/69909365/uploads/be2e2203c6740f4d42ebaa38bc30ccd8/duelytics-v1.0-beta5.zip)
 
 インストール形式では無いので、不要になった場合はフォルダ事削除してください。  
 ローカルで動作するアプリケーションなので、ダウンロードした後はインターネットの接続は不要です。

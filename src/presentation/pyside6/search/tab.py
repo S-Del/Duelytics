@@ -1,6 +1,8 @@
 from injector import inject
 from PySide6.QtGui import QKeySequence, QShortcut
-from PySide6.QtWidgets import QGridLayout, QMessageBox, QWidget
+from PySide6.QtWidgets import (
+    QGridLayout, QHBoxLayout, QMessageBox, QPushButton, QVBoxLayout, QWidget
+)
 from sys import exit
 from typing import ClassVar
 
@@ -14,7 +16,6 @@ from . import (
     ResultCheckboxGroup,
     DeckNameInputGroup,
     DateRangeInputGroup,
-    ControlButtonGroup,
     SearchResultTableModel,
     SearchResultWindow
 )
@@ -41,10 +42,6 @@ class Tab(QWidget):
         )
         self.date_range_input_group = DateRangeInputGroup()
         self.advanced_search_group = AdvancedSearchGroup()
-        self.control_button_group = ControlButtonGroup(
-            self.on_click_search_button,
-            self.on_click_clear_button
-        )
         search_shortcut = QShortcut(
             QKeySequence("Ctrl+Return"),
             self
@@ -52,14 +49,26 @@ class Tab(QWidget):
         search_shortcut.activated.connect(self.on_click_search_button)
         self.search_result_windows: list[SearchResultWindow] = []
 
-        layout = QGridLayout()
-        layout.addWidget(self.id_input_group, 0, 0, 1, 2)
-        layout.addWidget(self.date_range_input_group, 0, 2)
-        layout.addWidget(self.first_or_second_checkbox_group, 1, 0)
-        layout.addWidget(self.result_checkbox_group, 1, 1)
-        layout.addWidget(self.deck_name_input_group, 1, 2)
-        layout.addWidget(self.advanced_search_group, 2, 0, 1, 3)
-        layout.addWidget(self.control_button_group, 3, 0, 1, 3)
+        form_layout = QGridLayout()
+        form_layout.addWidget(self.id_input_group, 0, 0, 1, 2)
+        form_layout.addWidget(self.date_range_input_group, 0, 2)
+        form_layout.addWidget(self.first_or_second_checkbox_group, 1, 0)
+        form_layout.addWidget(self.result_checkbox_group, 1, 1)
+        form_layout.addWidget(self.deck_name_input_group, 1, 2)
+        form_layout.addWidget(self.advanced_search_group, 2, 0, 1, 3)
+
+        search_button = QPushButton("検索")
+        search_button.clicked.connect(self.on_click_search_button)
+        clear_button = QPushButton("クリア")
+        clear_button.clicked.connect(self.on_click_clear_button)
+        button_layout = QHBoxLayout()
+        button_layout.addStretch(1)
+        button_layout.addWidget(clear_button)
+        button_layout.addWidget(search_button)
+
+        layout = QVBoxLayout()
+        layout.addLayout(form_layout)
+        layout.addLayout(button_layout)
         self.setLayout(layout)
 
     def update_completer_deck_list(self):

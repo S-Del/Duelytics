@@ -1,6 +1,8 @@
 from injector import inject
 from PySide6.QtGui import QKeySequence, QShortcut
-from PySide6.QtWidgets import QGridLayout, QMessageBox, QWidget
+from PySide6.QtWidgets import (
+    QGridLayout, QHBoxLayout, QMessageBox, QPushButton, QVBoxLayout, QWidget
+)
 from sys import exit
 from typing import ClassVar
 
@@ -17,7 +19,6 @@ from presentation.pyside6.shared import (
     DeckNameInputGroup,
     NoteInputGroup
 )
-from . import ControlButtonGroup
 
 
 class Tab(QWidget):
@@ -43,19 +44,29 @@ class Tab(QWidget):
         self.update_completer_deck_list()
 
         self.note_input_group = NoteInputGroup()
-        self.control_button_group = ControlButtonGroup(
-            self.on_click_register_button,
-            self.on_click_clear_button
-        )
         register_shortcut = QShortcut(QKeySequence("Ctrl+Return"), self)
         register_shortcut.activated.connect(self.on_click_register_button)
 
-        layout = QGridLayout()
-        layout.addWidget(self.first_or_second_radio_group, 0, 0)
-        layout.addWidget(self.result_radio_group, 0, 1)
-        layout.addWidget(self.deck_name_input_group, 0, 2)
-        layout.addWidget(self.note_input_group, 1, 0, 1, 3)
-        layout.addWidget(self.control_button_group, 2, 0, 1, 3)
+        form_layout = QGridLayout()
+        form_layout.addWidget(self.first_or_second_radio_group, 0, 0)
+        form_layout.addWidget(self.result_radio_group, 0, 1)
+        form_layout.addWidget(self.deck_name_input_group, 0, 2)
+        form_layout.addWidget(self.note_input_group, 1, 0, 1, 3)
+
+        register_button = QPushButton("登録")
+        register_button.clicked.connect(self.on_click_register_button)
+        clear_button = QPushButton("クリア")
+        clear_button.clicked.connect(self.on_click_clear_button)
+        button_layout = QHBoxLayout()
+        button_layout.addStretch(1)
+        button_layout.addWidget(clear_button)
+        button_layout.addWidget(register_button)
+
+        layout = QVBoxLayout()
+        layout.addLayout(form_layout)
+        layout.setStretchFactor(form_layout, 1)
+        layout.addLayout(button_layout)
+        layout.setStretchFactor(button_layout, 0)
 
         self.setLayout(layout)
 
