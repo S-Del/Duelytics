@@ -1,5 +1,11 @@
 from PySide6.QtWidgets import (
-    QDialog, QGridLayout, QMessageBox, QPushButton, QWidget
+    QDialog,
+    QGridLayout,
+    QHBoxLayout,
+    QMessageBox,
+    QPushButton,
+    QVBoxLayout,
+    QWidget
 )
 from sys import exit
 
@@ -36,18 +42,25 @@ class EditDialog(QDialog):
         if target.note:
             self.note_group.value = target.note
 
+        form_layout = QGridLayout()
+        form_layout.addWidget(self.first_or_second_group, 0, 0)
+        form_layout.addWidget(self.result_group, 0, 1)
+        form_layout.addWidget(self.deck_name_group, 0, 2)
+        form_layout.addWidget(self.note_group, 1, 0, 1, 3)
+
         self.cancel_button = QPushButton("キャンセル")
         self.cancel_button.clicked.connect(self.reject)
         self.accept_button = QPushButton("続行")
         self.accept_button.clicked.connect(self.on_click_accept_button)
+        button_layout = QHBoxLayout()
+        button_layout.addStretch(1)
+        button_layout.addWidget(self.cancel_button)
+        button_layout.addWidget(self.accept_button)
 
-        layout = QGridLayout()
-        layout.addWidget(self.first_or_second_group, 0, 0)
-        layout.addWidget(self.result_group, 0, 1)
-        layout.addWidget(self.deck_name_group, 0, 2)
-        layout.addWidget(self.note_group, 1, 0, 1, 3)
-        layout.addWidget(self.cancel_button, 2, 1)
-        layout.addWidget(self.accept_button, 2, 2)
+        layout = QVBoxLayout()
+        layout.addLayout(form_layout)
+        layout.addLayout(button_layout)
+
         self.setLayout(layout)
 
     def on_click_accept_button(self):
