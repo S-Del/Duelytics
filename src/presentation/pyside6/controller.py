@@ -16,7 +16,7 @@ class Controller(QMainWindow):
         super().__init__()
 
         central_widget = QWidget(self)
-        self.setWindowTitle("Duelytics")
+        self.setWindowTitle("Duelytics (beta5)")
         self.setCentralWidget(central_widget)
 
         tab_control = QTabWidget()
