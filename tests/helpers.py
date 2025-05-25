@@ -1,7 +1,7 @@
 from datetime import datetime
 from contextlib import contextmanager
-from typing import Type
-from uuid import uuid4
+from typing import Literal, Type
+from uuid import UUID, uuid4
 
 from pytest import fail
 
@@ -10,6 +10,27 @@ from domain.model.result import DuelResult, FirstOrSecond, ResultChar
 from domain.repository import UnitOfWork
 
 
+def make_duel_result(
+    id: UUID = uuid4(),
+    registered_at: datetime = datetime.now(),
+    first_or_second_char: Literal['F', 'S'] = 'F',
+    result_char: Literal['W', 'L', 'D'] = 'W',
+    my_deck_name: str = "MY_DECK_NAME",
+    opponent_deck_name: str = "OPPONENT_DECK_NAME",
+    note: str | None = None
+) -> DuelResult:
+    return DuelResult(
+        id,
+        registered_at,
+        FirstOrSecond(first_or_second_char),
+        ResultChar(result_char),
+        NonEmptyStr(my_deck_name),
+        NonEmptyStr(opponent_deck_name),
+        note
+    )
+
+
+# ToDo: 上記の make_deul_result に置き換える
 def make_result(
     first_or_second: FirstOrSecond,
     result: ResultChar,

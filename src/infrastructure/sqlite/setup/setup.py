@@ -5,7 +5,6 @@ from sqlite3 import connect, Error as SQLiteError
 from infrastructure.sqlite.config import DatabaseConfig
 from infrastructure.sqlite.config.table import (
     ResultTableConfig,
-    DeckTableConfig,
     NoteTableConfig
 )
 
@@ -76,27 +75,6 @@ def create_result_table():
         logger.info("登録日時カラムのインデックス作成完了")
 
 
-def create_deck_table():
-    sql = " ".join([
-        f"CREATE TABLE IF NOT EXISTS {DeckTableConfig.TABLE_NAME} (",
-        DeckTableConfig.COLUMN_NAMES.NAME,
-        "TEXT UNIQUE NOT NULL PRIMARY KEY",
-        f"CHECK ({DeckTableConfig.COLUMN_NAMES.NAME} <> '')"
-        ")"
-    ])
-    logger.debug("\n".join([
-        "create_deck_table()",
-        f"\tsql: {sql}"
-    ]))
-    with connect(DatabaseConfig.DATABASE_NAME) as conn:
-        try:
-            conn.execute(sql)
-        except SQLiteError as e:
-            logger.error(f"デッキ名テーブル作成失敗: {e}")
-            raise
-    logger.info("デッキ名テーブル作成完了")
-
-
 def create_note_table():
     sql = " ".join([
         f"CREATE TABLE IF NOT EXISTS {NoteTableConfig.TABLE_NAME} (",
@@ -129,5 +107,4 @@ def init_sqlite():
 
     create_database()
     create_result_table()
-    create_deck_table()
     create_note_table()
