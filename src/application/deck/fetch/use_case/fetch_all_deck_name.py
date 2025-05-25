@@ -17,7 +17,7 @@ class FetchAllDeckName:
     ):
         self.repository = repository
         self._initializer = initializer
-        self._logger = getLogger()
+        self._logger = getLogger(__name__)
 
     def handle(self) -> frozenset[str]:
         self._logger.info("登録済みの全てのデッキ名の取得開始")

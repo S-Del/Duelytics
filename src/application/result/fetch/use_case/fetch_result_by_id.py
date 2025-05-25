@@ -20,7 +20,7 @@ class FetchResultById:
     @inject
     def __init__(self, repository: ResultQueryRepository):
         self.repository = repository
-        self._logger = getLogger()
+        self._logger = getLogger(__name__)
 
     def handle(self, id_for_result: IdForResult) -> FetchResultData | None:
         self._logger.info(f"ID での試合結果の検索開始: {id_for_result.id}")

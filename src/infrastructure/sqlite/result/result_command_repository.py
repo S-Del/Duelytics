@@ -18,7 +18,7 @@ class SQLiteResultCommandRepository(ResultCommandRepository):
         if not isinstance(uow, SQLiteUnitOfWork):
             raise TypeError(f"UnitOfWork の型が不正: {uow}")
         self._uow = uow
-        self._logger = getLogger()
+        self._logger = getLogger(__name__)
 
     @property
     def uow(self) -> SQLiteUnitOfWork:

@@ -24,7 +24,7 @@ from . import SearchConditionBuilder
 class SQLiteResultQueryRepository(ResultQueryRepository):
     @inject
     def __init__(self, builder: SearchConditionBuilder):
-        self._logger = getLogger()
+        self._logger = getLogger(__name__)
         self._builder = builder
 
     def _row_to_result(self, row: Row) -> DuelResult:

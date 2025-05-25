@@ -13,7 +13,7 @@ class DeleteResultById:
     def __init__(self, uow: UnitOfWork, repository: ResultCommandRepository):
         self.uow = uow
         self.repository = repository
-        self._logger = getLogger()
+        self._logger = getLogger(__name__)
 
     def handle(self, id_for_result: IdForResult):
         self._logger.info(f"ID による試合結果の削除を開始: {id_for_result.id}")

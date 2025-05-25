@@ -30,7 +30,7 @@ class RegisterResultScenario:
         self.result_repository = result_repository
         self.note_repository = note_repository
         self.register_deck = register_deck
-        self._logger = getLogger()
+        self._logger = getLogger(__name__)
 
     def execute(self, command: RegisterResultCommand):
         try:

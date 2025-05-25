@@ -23,7 +23,7 @@ class FetchResultWithRecord:
     @inject
     def __init__(self, repository: ResultQueryRepository):
         self.repository = repository
-        self._logger = getLogger()
+        self._logger = getLogger(__name__)
 
     def _convert_to_record_data(self, record: Record) -> RecordData:
         return RecordData(

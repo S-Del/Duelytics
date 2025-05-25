@@ -33,7 +33,7 @@ class EditResultScenario:
         self.note_command_repository = note_command_repository
         self.note_query_repository = note_query_repository
         self.register_deck = register_deck
-        self._logger = getLogger()
+        self._logger = getLogger(__name__)
 
     def handle(self, command: EditResultCommand):
         self._logger.info("試合結果の編集を開始")

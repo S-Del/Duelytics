@@ -6,7 +6,7 @@ from pathlib import Path
 
 def init_logger():
     basicConfig(level=INFO)
-    logger = getLogger()
+    logger = getLogger(__name__)
     if logger.handlers:
         for handler in logger.handlers[:]:
             logger.removeHandler(handler)

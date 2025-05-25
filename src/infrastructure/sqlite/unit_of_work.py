@@ -11,7 +11,7 @@ class SQLiteUnitOfWork(UnitOfWork):
         self.db_path = DatabaseConfig.DATABASE_NAME
         self._conn: Connection | None = None
         self._transaction_depth = 0
-        self._logger = getLogger()
+        self._logger = getLogger(__name__)
 
     def __enter__(self) -> "SQLiteUnitOfWork":
         if self._transaction_depth == 0:

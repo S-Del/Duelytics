@@ -28,7 +28,7 @@ class RegisterDeckIfNotExists:
         self.query_repository = query_repository
         self.command_repository = command_repository
         self._deck_file_initializer = deck_file_initializer
-        self._logger = getLogger()
+        self._logger = getLogger(__name__)
 
     def handle(self, command: RegisterDeckCommand):
         self._logger.info(f"デッキ名の登録開始: {command.name}")
