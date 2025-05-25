@@ -9,9 +9,14 @@ from PySide6.QtWidgets import (
 )
 from sys import exit
 
-from application.exception import ApplicationCriticalError
+from application.events import EventAggregator
+from application.exception import (
+    ApplicationCriticalError, ApplicationOperationWarning
+)
+from application.exception.invalid_command_error import InvalidCommandError
 from application.result.edit import EditResultCommand, EditResultScenario
 from application.result.fetch.use_case import FetchResultData
+from presentation.events import StatusBarMessageEvent
 from presentation.pyside6.shared import (
     DeckNameInputGroup,
     FirstOrSecondRadioGroup,
@@ -24,11 +29,12 @@ class EditDialog(QDialog):
     def __init__(self,
         parent: QWidget | None,
         target: FetchResultData,
-        edit_result: EditResultScenario
+        edit_result: EditResultScenario,
+        event_aggregator: EventAggregator
     ):
         super().__init__(parent)
         self.setWindowTitle("試合結果 編集")
-
+        self._event_aggregator = event_aggregator
         self.target = target
         self.edit_result = edit_result
         self.first_or_second_group = FirstOrSecondRadioGroup()
@@ -75,14 +81,20 @@ class EditDialog(QDialog):
                     self.note_group.value
                 )
             )
-        except ValueError as ve:
-            QMessageBox.warning(self, "値が不正", str(ve))
+            QMessageBox.information(self,
+                "編集完了", "指定された試合結果の編集が完了しました"
+            )
+            self.accept()
+        except ApplicationOperationWarning as aow:
+            self._event_aggregator.publish(
+                StatusBarMessageEvent(aow.msg, aow.details)
+            )
+            self.accept()
+        except InvalidCommandError as ice:
+            QMessageBox.warning(self,
+                "コマンドオブジェクトの作成に失敗", str(ice)
+            )
             self.reject()
         except ApplicationCriticalError as ae:
             QMessageBox.critical(self, "データベースエラー", str(ae))
             exit(1)
-
-        QMessageBox.information(self,
-            "編集完了", "指定された試合結果の編集が完了しました"
-        )
-        self.accept()

@@ -73,16 +73,9 @@ class EditResultScenario:
         # デッキ名の記録は、
         # 試合結果記録の原始性 (試合結果記録時の UoW の管理下) に
         # 「含むべきではない」。
-        # 試合結果テーブルとデッキ名テーブルに依存性や結合は無い為。
+        # 試合結果テーブルとデッキ名ファイルは関係無いため。
         unique_deck_names = set([
             command.my_deck_name, command.opponent_deck_name
         ])
-        try:
-            self._logger.info("デッキ名の登録開始")
-            for name in unique_deck_names:
-                self.register_deck.handle(RegisterDeckCommand(name))
-        except SQLiteError as se:
-            # こちらでも DB のエラーは把捉して記録し「異常終了したい」のは同様
-            self._logger.critical(f"データベースエラー: {se}")
-            raise ApplicationCriticalError from se
-        self._logger.info("デッキ名の登録完了")
+        for name in unique_deck_names:
+            self.register_deck.handle(RegisterDeckCommand(name))
