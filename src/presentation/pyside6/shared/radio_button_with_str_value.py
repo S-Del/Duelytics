@@ -14,3 +14,7 @@ class RadioButtonWithStrValue(QRadioButton, Generic[T]):
 
         self.setText(label)
         self._value = value
+
+    @property
+    def value(self) -> T:
+        return self._value

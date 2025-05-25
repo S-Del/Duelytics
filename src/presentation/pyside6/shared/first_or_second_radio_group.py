@@ -34,7 +34,7 @@ class FirstOrSecondRadioGroup(QGroupBox):
         checked_button = self._button_group.checkedButton()
         if not isinstance(checked_button, RadioButtonWithStrValue):
             raise TypeError("ラジオボタンの型が不正")
-        return checked_button._value
+        return checked_button.value
 
     @value.setter
     def value(self, value: VALID_RADIO_VALUE):

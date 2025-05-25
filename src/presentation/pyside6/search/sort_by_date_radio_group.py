@@ -45,7 +45,7 @@ class SortByDateRadioGroup(QWidget):
         checked = self._radio_group.checkedButton()
         if not isinstance(checked, RadioButtonWithStrValue):
             raise TypeError("ラジオボタンの型が不正")
-        return checked._value
+        return checked.value
 
     def reset(self):
         self._radio_group.buttons()[0].setChecked(True)
