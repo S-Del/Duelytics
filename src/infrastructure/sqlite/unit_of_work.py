@@ -8,7 +8,7 @@ from infrastructure.sqlite.config import DatabaseConfig
 
 class SQLiteUnitOfWork(UnitOfWork):
     def __init__(self):
-        self.db_path = DatabaseConfig.DATABASE_NAME
+        self._db_path = DatabaseConfig.DATABASE_NAME
         self._conn: Connection | None = None
         self._transaction_depth = 0
         self._logger = getLogger(__name__)
@@ -16,7 +16,7 @@ class SQLiteUnitOfWork(UnitOfWork):
     def __enter__(self) -> "SQLiteUnitOfWork":
         if self._transaction_depth == 0:
             self._logger.debug("新しいコネクションを作成")
-            self._conn = connect(self.db_path)
+            self._conn = connect(self._db_path)
             command = "PRAGMA foreign_keys = ON"
             self._logger.debug(f'外部キー制約を有効化: "{command}"')
             self._conn.execute(command)

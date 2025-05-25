@@ -26,9 +26,9 @@ class SortByDateRadioGroup(QWidget):
         asc_radio = RadioButtonWithStrValue[VALID_RADIO_VALUE](
             "古い順", "ASC"
         )
-        self.radio_group = QButtonGroup()
-        self.radio_group.addButton(desc_radio)
-        self.radio_group.addButton(asc_radio)
+        self._radio_group = QButtonGroup()
+        self._radio_group.addButton(desc_radio)
+        self._radio_group.addButton(asc_radio)
         radio_layout = QHBoxLayout()
         radio_layout.addWidget(desc_radio)
         radio_layout.addWidget(asc_radio)
@@ -42,10 +42,10 @@ class SortByDateRadioGroup(QWidget):
 
     @property
     def order_by(self) -> VALID_RADIO_VALUE:
-        checked = self.radio_group.checkedButton()
+        checked = self._radio_group.checkedButton()
         if not isinstance(checked, RadioButtonWithStrValue):
             raise TypeError("ラジオボタンの型が不正")
-        return checked.value
+        return checked._value
 
     def reset(self):
-        self.radio_group.buttons()[0].setChecked(True)
+        self._radio_group.buttons()[0].setChecked(True)

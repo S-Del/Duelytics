@@ -7,24 +7,24 @@ class IdInputGroup(QGroupBox):
         super().__init__("ID 入力")
 
         label = QLabel("入力があった場合は他の検索条件は無視される")
-        self.input = QLineEdit()
-        self.input.setPlaceholderText("XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX")
+        self._input = QLineEdit()
+        self._input.setPlaceholderText("XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX")
         # Completer を導入するべきかどうか
         # ID なら手入力せずにコピペするはず？？
 
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         layout.addWidget(label)
-        layout.addWidget(self.input)
+        layout.addWidget(self._input)
 
         self.setLayout(layout)
 
     @property
     def id(self) -> str | None:
-        id = self.input.text().strip()
+        id = self._input.text().strip()
         if not id:
             return None
         return id
 
     def reset(self):
-        self.input.setText("")
+        self._input.setText("")

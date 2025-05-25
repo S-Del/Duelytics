@@ -24,42 +24,42 @@ class DeckNameInputGroup(QGroupBox):
 
         label = QLabel("入力しなかった場合は全てのデッキ名で検索")
 
-        self.list_model = QStringListModel()
-        completer = QCompleter(self.list_model)
+        self._list_model = QStringListModel()
+        completer = QCompleter(self._list_model)
         completer.setFilterMode(Qt.MatchFlag.MatchContains)
 
         my_deck_label = QLabel("自分のデッキ名")
-        self.my_deck_input = QLineEdit()
-        self.my_deck_input.setCompleter(completer)
-        self.my_deck_focused_filter = OnFocusEventFilter(
+        self._my_deck_input = QLineEdit()
+        self._my_deck_input.setCompleter(completer)
+        self._my_deck_focused_filter = OnFocusEventFilter(
             self.emit_deck_input_focused, self
         )
-        self.my_deck_input.installEventFilter(self.my_deck_focused_filter)
-        self.my_deck_search_type_radio = SearchTypeRadioGroup()
+        self._my_deck_input.installEventFilter(self._my_deck_focused_filter)
+        self._my_deck_search_type_radio = SearchTypeRadioGroup()
 
         opponent_deck_label = QLabel("相手のデッキ名")
-        self.opponent_deck_input = QLineEdit()
-        self.opponent_deck_input.setCompleter(completer)
-        self.opponent_deck_focused_filter = OnFocusEventFilter(
+        self._opponent_deck_input = QLineEdit()
+        self._opponent_deck_input.setCompleter(completer)
+        self._opponent_deck_focused_filter = OnFocusEventFilter(
             self.emit_deck_input_focused, self
         )
-        self.opponent_deck_input.installEventFilter(
-            self.opponent_deck_focused_filter
+        self._opponent_deck_input.installEventFilter(
+            self._opponent_deck_focused_filter
         )
-        self.opponent_deck_search_type_radio = SearchTypeRadioGroup()
+        self._opponent_deck_search_type_radio = SearchTypeRadioGroup()
 
         layout = QFormLayout()
         layout.addRow(label)
-        layout.addRow(my_deck_label, self.my_deck_input)
-        layout.addRow(self.my_deck_search_type_radio)
-        layout.addRow(opponent_deck_label, self.opponent_deck_input)
-        layout.addRow(self.opponent_deck_search_type_radio)
+        layout.addRow(my_deck_label, self._my_deck_input)
+        layout.addRow(self._my_deck_search_type_radio)
+        layout.addRow(opponent_deck_label, self._opponent_deck_input)
+        layout.addRow(self._opponent_deck_search_type_radio)
 
         self.setLayout(layout)
 
     @property
     def my_deck_name(self) -> str | None:
-        deck_name = self.my_deck_input.text().strip()
+        deck_name = self._my_deck_input.text().strip()
         if not deck_name:
             return None
         return deck_name
@@ -68,11 +68,11 @@ class DeckNameInputGroup(QGroupBox):
     def my_deck_search_type(self) -> Literal[
         "exact", "partial", "prefix", "suffix"
     ]:
-        return self.my_deck_search_type_radio.value
+        return self._my_deck_search_type_radio.value
 
     @property
     def opponent_deck_name(self) -> str | None:
-        deck_name = self.opponent_deck_input.text().strip()
+        deck_name = self._opponent_deck_input.text().strip()
         if not deck_name:
             return None
         return deck_name
@@ -81,16 +81,16 @@ class DeckNameInputGroup(QGroupBox):
     def opponent_deck_search_type(self) -> Literal[
         "exact", "partial", "prefix", "suffix"
     ]:
-        return self.opponent_deck_search_type_radio.value
+        return self._opponent_deck_search_type_radio.value
 
     def reset(self):
-        self.my_deck_input.setText("")
-        self.opponent_deck_input.setText("")
-        self.my_deck_search_type_radio.reset()
-        self.opponent_deck_search_type_radio.reset()
+        self._my_deck_input.setText("")
+        self._opponent_deck_input.setText("")
+        self._my_deck_search_type_radio.reset()
+        self._opponent_deck_search_type_radio.reset()
 
     def update_completer_deck_list(self, deck_names: Sequence[str]):
-        self.list_model.setStringList(deck_names)
+        self._list_model.setStringList(deck_names)
 
     def emit_deck_input_focused(self):
         self.deck_input_focused.emit()

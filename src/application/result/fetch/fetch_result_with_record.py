@@ -22,7 +22,7 @@ from . import FetchResultRequest, FetchResultResponse, RecordData
 class FetchResultWithRecord:
     @inject
     def __init__(self, repository: ResultQueryRepository):
-        self.repository = repository
+        self._repository = repository
         self._logger = getLogger(__name__)
 
     def _convert_to_record_data(self, record: Record) -> RecordData:
@@ -43,7 +43,7 @@ class FetchResultWithRecord:
     def _fetch_by_id(self, id: str | None) -> FetchResultResponse | None:
         self._logger.info(f"ID での検索を開始: {id}")
         try:
-            result = self.repository.search_by_id(UUID(id))
+            result = self._repository.search_by_id(UUID(id))
             if not result:
                 return None
             record = RecordFactory([result]).create()
@@ -148,7 +148,7 @@ class FetchResultWithRecord:
         self._logger.info("試合結果の検索開始")
 
         try:
-            results = self.repository.search(query)
+            results = self._repository.search(query)
         except (SQLiteError, RepositoryDataError) as e:
             self._logger.critical(f"試合結果の検索に失敗: {e}")
             raise ApplicationCriticalError from e

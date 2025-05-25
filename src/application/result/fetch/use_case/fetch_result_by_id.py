@@ -19,13 +19,13 @@ class FetchResultById:
     """
     @inject
     def __init__(self, repository: ResultQueryRepository):
-        self.repository = repository
+        self._repository = repository
         self._logger = getLogger(__name__)
 
     def handle(self, id_for_result: IdForResult) -> FetchResultData | None:
         self._logger.info(f"ID での試合結果の検索開始: {id_for_result.id}")
         try:
-            result = self.repository.search_by_id(id_for_result.uuid)
+            result = self._repository.search_by_id(id_for_result.uuid)
         except SQLiteError as e:
             self._logger.warning(f"データベースエラー: {e}")
             raise ApplicationCriticalError from e

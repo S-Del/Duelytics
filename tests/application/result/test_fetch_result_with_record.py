@@ -15,15 +15,15 @@ class SpyResultQueryRepository(ResultQueryRepository):
     """
 
     def __init__(self):
-        self.last_query: FetchResultQuery | None = None
-        self.last_id: UUID | None = None
+        self._last_query: FetchResultQuery | None = None
+        self._last_id: UUID | None = None
 
     def search(self, query: FetchResultQuery) -> tuple[DuelResult]:
-        self.last_query = query
+        self._last_query = query
         return tuple() # 返す値は不要
 
     def search_by_id(self, id: UUID) -> DuelResult | None:
-        self.last_id = id
+        self._last_id = id
         return None # 返す値は不要
 
 
@@ -45,8 +45,8 @@ def test_builds_correct_fetch_query():
     })
     # query は作成されず last_query は None で、
     # ID のみでの検索が行われていなければならない。
-    assert repository.last_query is None
-    assert repository.last_id == id
+    assert repository._last_query is None
+    assert repository._last_id == id
 
     repository = SpyResultQueryRepository()
     fetch_result = FetchResultWithRecord(repository)
@@ -63,7 +63,7 @@ def test_builds_correct_fetch_query():
         "limit": 50
     })
     # query が作成され、指定したパラメータをすべて取得できなければならない。
-    query = repository.last_query
+    query = repository._last_query
     assert query is not None
     assert query.get("first_or_second") == [FirstOrSecond.FIRST]
     assert query.get("result") == [ResultChar.WIN]

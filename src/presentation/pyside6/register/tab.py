@@ -34,27 +34,27 @@ class Tab(QWidget):
     ):
         super().__init__()
         self._event_aggregator = event_aggregator
-        self.register_result_scenario = register_result
-        self.fetch_all_deck_name = fetch_all_deck_name
+        self._register_result_scenario = register_result
+        self._fetch_all_deck_name = fetch_all_deck_name
 
-        self.first_or_second_radio_group = FirstOrSecondRadioGroup()
-        self.result_radio_group = ResultRadioGroup()
+        self._first_or_second_radio_group = FirstOrSecondRadioGroup()
+        self._result_radio_group = ResultRadioGroup()
 
-        self.deck_name_input_group = DeckNameInputGroup()
-        self.deck_name_input_group.deck_input_focused.connect(
+        self._deck_name_input_group = DeckNameInputGroup()
+        self._deck_name_input_group.deck_input_focused.connect(
             self.update_completer_deck_list
         )
         self.update_completer_deck_list()
 
-        self.note_input_group = NoteInputGroup()
+        self._note_input_group = NoteInputGroup()
         register_shortcut = QShortcut(QKeySequence("Ctrl+Return"), self)
         register_shortcut.activated.connect(self.on_click_register_button)
 
         form_layout = QGridLayout()
-        form_layout.addWidget(self.first_or_second_radio_group, 0, 0)
-        form_layout.addWidget(self.result_radio_group, 0, 1)
-        form_layout.addWidget(self.deck_name_input_group, 0, 2)
-        form_layout.addWidget(self.note_input_group, 1, 0, 1, 3)
+        form_layout.addWidget(self._first_or_second_radio_group, 0, 0)
+        form_layout.addWidget(self._result_radio_group, 0, 1)
+        form_layout.addWidget(self._deck_name_input_group, 0, 2)
+        form_layout.addWidget(self._note_input_group, 1, 0, 1, 3)
 
         register_button = QPushButton("登録")
         register_button.clicked.connect(self.on_click_register_button)
@@ -75,37 +75,37 @@ class Tab(QWidget):
 
     def update_completer_deck_list(self):
         try:
-            deck_names = self.fetch_all_deck_name.handle()
+            deck_names = self._fetch_all_deck_name.handle()
         except ApplicationOperationWarning as aow:
             self._event_aggregator.publish(
                 StatusBarMessageEvent(aow.msg, aow.details)
             )
             return
-        self.deck_name_input_group.update_completer_deck_list(
+        self._deck_name_input_group.update_completer_deck_list(
             tuple(deck_names)
         )
 
     def on_click_clear_button(self):
-        self.first_or_second_radio_group.reset()
-        self.result_radio_group.reset()
-        self.deck_name_input_group.reset()
-        self.note_input_group.reset()
+        self._first_or_second_radio_group.reset()
+        self._result_radio_group.reset()
+        self._deck_name_input_group.reset()
+        self._note_input_group.reset()
 
     def on_click_register_button(self):
         try:
-            self.deck_name_input_group.validate()
+            self._deck_name_input_group.validate()
         except ValueError as ae:
             QMessageBox.warning(self, "未入力項目", str(ae))
             return
 
         try:
-            self.register_result_scenario.execute(
+            self._register_result_scenario.execute(
                 RegisterResultCommand(
-                    self.first_or_second_radio_group.value,
-                    self.result_radio_group.value,
-                    self.deck_name_input_group.my_deck_name,
-                    self.deck_name_input_group.opponent_deck_name,
-                    self.note_input_group.value
+                    self._first_or_second_radio_group.value,
+                    self._result_radio_group.value,
+                    self._deck_name_input_group.my_deck_name,
+                    self._deck_name_input_group.opponent_deck_name,
+                    self._note_input_group.value
                 )
             )
         except InvalidCommandError as ice:

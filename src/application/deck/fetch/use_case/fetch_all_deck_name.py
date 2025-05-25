@@ -15,7 +15,7 @@ class FetchAllDeckName:
         repository: DeckNameQueryRepository,
         initializer: DeckNameFileInitializer
     ):
-        self.repository = repository
+        self._repository = repository
         self._initializer = initializer
         self._logger = getLogger(__name__)
 
@@ -24,7 +24,7 @@ class FetchAllDeckName:
 
         try:
             deck_names = frozenset(
-                deck.value for deck in self.repository.read_all()
+                deck.value for deck in self._repository.read_all()
             )
         except DeckNameFileNotFoundError as fnfe:
             self._logger.error(f"デッキ名ファイルが存在しない: {fnfe}")

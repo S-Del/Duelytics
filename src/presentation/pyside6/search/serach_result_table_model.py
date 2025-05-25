@@ -20,7 +20,7 @@ class SearchResultTableModel(QAbstractTableModel):
 
     def __init__(self, results: list[FetchResultData]):
         super().__init__()
-        self.results = results
+        self._results = results
 
     def data(self,
         index: QModelIndex | QPersistentModelIndex,
@@ -30,33 +30,33 @@ class SearchResultTableModel(QAbstractTableModel):
             return
 
         if role == Qt.ItemDataRole.DisplayRole:
-            return self.results[index.row()][index.column()]
+            return self._results[index.row()][index.column()]
 
         blue = QColor(16, 96, 224)
         red = QColor(192, 16, 16)
         if role == Qt.ItemDataRole.ForegroundRole:
             if index.column() == SearchResultTableModel.HEADERS.index("先/後"):
-                if self.results[index.row()].first_or_second_raw == 'F':
+                if self._results[index.row()].first_or_second_raw == 'F':
                     return blue
                 else:
                     return red
             if index.column() == SearchResultTableModel.HEADERS.index(
                 "試合結果"
             ):
-                if self.results[index.row()].result_raw == 'W':
+                if self._results[index.row()].result_raw == 'W':
                     return blue
-                if self.results[index.row()].result_raw == 'L':
+                if self._results[index.row()].result_raw == 'L':
                     return red
 
     def rowCount(self,
         parent: QModelIndex | QPersistentModelIndex = QModelIndex()
     ) -> int:
-        return len(self.results)
+        return len(self._results)
 
     def columnCount(self,
         parent: QModelIndex | QPersistentModelIndex = QModelIndex()
     ) -> int:
-        return len(self.results[0]) if self.results else 0
+        return len(self._results[0]) if self._results else 0
 
     def headerData(self,
         section: int,

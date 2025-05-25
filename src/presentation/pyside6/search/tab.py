@@ -36,31 +36,31 @@ class Tab(QWidget):
     ):
         super().__init__()
         self._event_aggregator = event_aggregator
-        self.fetch_result_with_record = fetch_result_with_record
-        self.fetch_all_deck_name = fetch_all_deck_name
-        self.id_input_group = IdInputGroup()
-        self.first_or_second_checkbox_group = FirstOrSecondCheckboxGroup()
-        self.result_checkbox_group = ResultCheckboxGroup()
-        self.deck_name_input_group = DeckNameInputGroup()
-        self.deck_name_input_group.deck_input_focused.connect(
+        self._fetch_result_with_record = fetch_result_with_record
+        self._fetch_all_deck_name = fetch_all_deck_name
+        self._id_input_group = IdInputGroup()
+        self._first_or_second_checkbox_group = FirstOrSecondCheckboxGroup()
+        self._result_checkbox_group = ResultCheckboxGroup()
+        self._deck_name_input_group = DeckNameInputGroup()
+        self._deck_name_input_group.deck_input_focused.connect(
             self.update_completer_deck_list
         )
-        self.date_range_input_group = DateRangeInputGroup()
-        self.advanced_search_group = AdvancedSearchGroup()
+        self._date_range_input_group = DateRangeInputGroup()
+        self._advanced_search_group = AdvancedSearchGroup()
         search_shortcut = QShortcut(
             QKeySequence("Ctrl+Return"),
             self
         )
         search_shortcut.activated.connect(self.on_click_search_button)
-        self.search_result_windows: list[SearchResultWindow] = []
+        self._search_result_windows: list[SearchResultWindow] = []
 
         form_layout = QGridLayout()
-        form_layout.addWidget(self.id_input_group, 0, 0, 1, 2)
-        form_layout.addWidget(self.date_range_input_group, 0, 2)
-        form_layout.addWidget(self.first_or_second_checkbox_group, 1, 0)
-        form_layout.addWidget(self.result_checkbox_group, 1, 1)
-        form_layout.addWidget(self.deck_name_input_group, 1, 2)
-        form_layout.addWidget(self.advanced_search_group, 2, 0, 1, 3)
+        form_layout.addWidget(self._id_input_group, 0, 0, 1, 2)
+        form_layout.addWidget(self._date_range_input_group, 0, 2)
+        form_layout.addWidget(self._first_or_second_checkbox_group, 1, 0)
+        form_layout.addWidget(self._result_checkbox_group, 1, 1)
+        form_layout.addWidget(self._deck_name_input_group, 1, 2)
+        form_layout.addWidget(self._advanced_search_group, 2, 0, 1, 3)
 
         search_button = QPushButton("検索")
         search_button.clicked.connect(self.on_click_search_button)
@@ -78,55 +78,55 @@ class Tab(QWidget):
 
     def update_completer_deck_list(self):
         try:
-            deck_names = self.fetch_all_deck_name.handle()
+            deck_names = self._fetch_all_deck_name.handle()
         except ApplicationOperationWarning as aow:
             self._event_aggregator.publish(
                 StatusBarMessageEvent(aow.msg, aow.details)
             )
             return
-        self.deck_name_input_group.update_completer_deck_list(
+        self._deck_name_input_group.update_completer_deck_list(
             tuple(deck_names)
         )
 
     def remove_search_result_window(self, window: SearchResultWindow):
-        if window in self.search_result_windows:
-            self.search_result_windows.remove(window)
+        if window in self._search_result_windows:
+            self._search_result_windows.remove(window)
 
     def on_click_clear_button(self):
-        self.id_input_group.reset()
-        self.first_or_second_checkbox_group.reset()
-        self.result_checkbox_group.reset()
-        self.deck_name_input_group.reset()
-        self.date_range_input_group.reset()
-        self.advanced_search_group.reset()
+        self._id_input_group.reset()
+        self._first_or_second_checkbox_group.reset()
+        self._result_checkbox_group.reset()
+        self._deck_name_input_group.reset()
+        self._date_range_input_group.reset()
+        self._advanced_search_group.reset()
 
     def on_click_search_button(self):
         request: FetchResultRequest = {}
-        if self.id_input_group.id:
-            request["id"] = self.id_input_group.id
-        request["first_or_second"] = self.first_or_second_checkbox_group.values
-        request["result"] = self.result_checkbox_group.values
-        if self.deck_name_input_group.my_deck_name:
-            request["my_deck_name"] = self.deck_name_input_group.my_deck_name
+        if self._id_input_group.id:
+            request["id"] = self._id_input_group.id
+        request["first_or_second"] = self._first_or_second_checkbox_group.values
+        request["result"] = self._result_checkbox_group.values
+        if self._deck_name_input_group.my_deck_name:
+            request["my_deck_name"] = self._deck_name_input_group.my_deck_name
         request["my_deck_name_search_type"] = (
-            self.deck_name_input_group.my_deck_search_type
+            self._deck_name_input_group.my_deck_search_type
         )
-        if self.deck_name_input_group.opponent_deck_name:
+        if self._deck_name_input_group.opponent_deck_name:
             request["opponent_deck_name"] = (
-                self.deck_name_input_group.opponent_deck_name
+                self._deck_name_input_group.opponent_deck_name
             )
         request["opponent_deck_name_search_type"] = (
-            self.deck_name_input_group.opponent_deck_search_type
+            self._deck_name_input_group.opponent_deck_search_type
         )
-        if self.date_range_input_group.since:
-            request["since"] = self.date_range_input_group.since
-        if self.date_range_input_group.until:
-            request["until"] = self.date_range_input_group.until
-        request["order"] = self.date_range_input_group.order_by
-        request["limit"] = self.advanced_search_group.limit
+        if self._date_range_input_group.since:
+            request["since"] = self._date_range_input_group.since
+        if self._date_range_input_group.until:
+            request["until"] = self._date_range_input_group.until
+        request["order"] = self._date_range_input_group.order_by
+        request["limit"] = self._advanced_search_group.limit
 
         try:
-            fetch_result = self.fetch_result_with_record.handle(request)
+            fetch_result = self._fetch_result_with_record.handle(request)
         except ValueError as ve:
             QMessageBox.warning(self, "不正な値", str(ve))
             return
@@ -154,4 +154,4 @@ class Tab(QWidget):
         )
         search_result_window.resize(1280, 720)
         search_result_window.show()
-        self.search_result_windows.append(search_result_window)
+        self._search_result_windows.append(search_result_window)

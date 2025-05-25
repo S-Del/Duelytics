@@ -24,11 +24,11 @@ class SearchTypeRadioGroup(QWidget):
         suffix_radio = RadioButtonWithStrValue[VALID_RADIO_VALUE](
             "後方一致", "suffix"
         )
-        self.button_group = QButtonGroup()
-        self.button_group.addButton(exact_radio)
-        self.button_group.addButton(partial_radio)
-        self.button_group.addButton(prefix_radio)
-        self.button_group.addButton(suffix_radio)
+        self._button_group = QButtonGroup()
+        self._button_group.addButton(exact_radio)
+        self._button_group.addButton(partial_radio)
+        self._button_group.addButton(prefix_radio)
+        self._button_group.addButton(suffix_radio)
         layout = QHBoxLayout()
         layout.addWidget(exact_radio)
         layout.addWidget(partial_radio)
@@ -39,10 +39,10 @@ class SearchTypeRadioGroup(QWidget):
 
     @property
     def value(self) -> VALID_RADIO_VALUE:
-        checked = self.button_group.checkedButton()
+        checked = self._button_group.checkedButton()
         if not isinstance(checked, RadioButtonWithStrValue):
             raise TypeError("ラジオボタンの型が不正")
-        return checked.value
+        return checked._value
 
     def reset(self):
-        self.button_group.buttons()[0].setChecked(True)
+        self._button_group.buttons()[0].setChecked(True)

@@ -7,23 +7,23 @@ class AdvancedSearchGroup(QGroupBox):
     def __init__(self):
         super().__init__("詳細条件 指定")
 
-        self.limit_input_group = LimitInputGroup()
-        self.keyword_input_group = KeywordInputGroup()
+        self._limit_input_group = LimitInputGroup()
+        self._keyword_input_group = KeywordInputGroup()
 
         layout = QGridLayout()
-        layout.addWidget(self.limit_input_group)
-        layout.addWidget(self.keyword_input_group)
+        layout.addWidget(self._limit_input_group)
+        layout.addWidget(self._keyword_input_group)
 
         self.setLayout(layout)
 
     @property
     def limit(self) -> int:
-        return self.limit_input_group.value
+        return self._limit_input_group.value
 
     @property
     def keywords(self) -> tuple[str, ...]:
-        return self.keyword_input_group.values
+        return self._keyword_input_group.values
 
     def reset(self):
-        self.limit_input_group.reset()
-        self.keyword_input_group.reset()
+        self._limit_input_group.reset()
+        self._keyword_input_group.reset()
