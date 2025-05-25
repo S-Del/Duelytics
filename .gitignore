@@ -11,3 +11,4 @@ htmlcov/
 *.spec
 *.db
 *.db-journal
+*.dnl

@@ -7,12 +7,14 @@ from sys import exit
 from typing import ClassVar
 
 from application.deck.fetch.use_case import FetchAllDeckName
+from application.events import EventAggregator
 from application.exception import (
-    ApplicationCriticalError, InvalidCommandError
+    ApplicationCriticalError, ApplicationOperationWarning, InvalidCommandError
 )
 from application.result.register import (
     RegisterResultCommand, RegisterResultScenario
 )
+from presentation.events import StatusBarMessageEvent
 from presentation.pyside6.shared import (
     FirstOrSecondRadioGroup,
     ResultRadioGroup,
@@ -26,11 +28,12 @@ class Tab(QWidget):
 
     @inject
     def __init__(self,
+        event_aggregator: EventAggregator,
         register_result: RegisterResultScenario,
         fetch_all_deck_name: FetchAllDeckName
     ):
         super().__init__()
-
+        self._event_aggregator = event_aggregator
         self.register_result_scenario = register_result
         self.fetch_all_deck_name = fetch_all_deck_name
 
@@ -73,9 +76,11 @@ class Tab(QWidget):
     def update_completer_deck_list(self):
         try:
             deck_names = self.fetch_all_deck_name.handle()
-        except ApplicationCriticalError as ae:
-            QMessageBox.critical(self, "アプリケーションエラー", str(ae))
-            exit(1)
+        except ApplicationOperationWarning as aow:
+            self._event_aggregator.publish(
+                StatusBarMessageEvent(aow.msg, aow.details)
+            )
+            return
         self.deck_name_input_group.update_completer_deck_list(
             tuple(deck_names)
         )
@@ -105,6 +110,11 @@ class Tab(QWidget):
             )
         except InvalidCommandError as ice:
             QMessageBox.warning(self, "入力エラー", str(ice))
+            return
+        except ApplicationOperationWarning as aow:
+            self._event_aggregator.publish(
+                StatusBarMessageEvent(aow.msg, aow.details)
+            )
             return
         except ApplicationCriticalError as ae:
             QMessageBox.critical(self, "アプリケーションエラー", str(ae))

@@ -7,8 +7,12 @@ from sys import exit
 from typing import ClassVar
 
 from application.deck.fetch.use_case import FetchAllDeckName
-from application.exception import ApplicationCriticalError
+from application.events import EventAggregator
+from application.exception import (
+    ApplicationCriticalError, ApplicationOperationWarning
+)
 from application.result.fetch import FetchResultRequest, FetchResultWithRecord
+from presentation.events.status_bar_message_event import StatusBarMessageEvent
 from .advanced_search import AdvancedSearchGroup
 from . import (
     IdInputGroup,
@@ -26,11 +30,12 @@ class Tab(QWidget):
 
     @inject
     def __init__(self,
+        event_aggregator: EventAggregator,
         fetch_result_with_record: FetchResultWithRecord,
         fetch_all_deck_name: FetchAllDeckName
     ):
         super().__init__()
-
+        self._event_aggregator = event_aggregator
         self.fetch_result_with_record = fetch_result_with_record
         self.fetch_all_deck_name = fetch_all_deck_name
         self.id_input_group = IdInputGroup()
@@ -74,9 +79,11 @@ class Tab(QWidget):
     def update_completer_deck_list(self):
         try:
             deck_names = self.fetch_all_deck_name.handle()
-        except ApplicationCriticalError as ae:
-            QMessageBox.critical(self, "アプリケーションエラー", str(ae))
-            exit(1)
+        except ApplicationOperationWarning as aow:
+            self._event_aggregator.publish(
+                StatusBarMessageEvent(aow.msg, aow.details)
+            )
+            return
         self.deck_name_input_group.update_completer_deck_list(
             tuple(deck_names)
         )

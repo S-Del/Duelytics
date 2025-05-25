@@ -1,2 +1,2 @@
-from .deck_command_repository import DeckCommandRepository
-from .deck_query_repository import DeckQueryRepository
+from .deck_name_command_repository import DeckNameCommandRepository
+from .deck_name_query_repository import DeckNameQueryRepository

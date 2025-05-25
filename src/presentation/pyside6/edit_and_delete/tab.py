@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
 from sys import exit
 from typing import ClassVar
 
+from application.events import EventAggregator
 from application.exception import ApplicationCriticalError, InvalidCommandError
 from application.result import IdForResult
 from application.result.delete.use_case import DeleteResultById
@@ -26,12 +27,13 @@ class Tab(QWidget):
 
     @inject
     def __init__(self,
+        event_aggregator: EventAggregator,
         fetch_result_by_id: FetchResultById,
         delete_result_by_id: DeleteResultById,
         edit_result: EditResultScenario,
     ):
         super().__init__()
-
+        self._event_aggregator = event_aggregator
         self.fetch_result_by_id = fetch_result_by_id
         self.delete_result_by_id = delete_result_by_id
         self.edit_result = edit_result
@@ -154,7 +156,9 @@ class Tab(QWidget):
             )
             self.reset()
             return
-        dialog = EditDialog(self, self.target, self.edit_result)
+        dialog = EditDialog(
+            self, self.target, self.edit_result, self._event_aggregator
+        )
         dialog.exec()
         self.reset()
 
