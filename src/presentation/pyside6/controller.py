@@ -28,7 +28,7 @@ class Controller(QMainWindow):
             StatusBarMessageEvent, self._on_status_bar_message_event
         )
         central_widget = QWidget(self)
-        self.setWindowTitle("Duelytics (beta5)")
+        self.setWindowTitle("Duelytics (beta6)")
         self.setCentralWidget(central_widget)
         self.setStatusBar(QStatusBar(self))
         self.statusBar().addPermanentWidget(QLabel())
