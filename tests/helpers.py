@@ -5,9 +5,9 @@ from uuid import UUID, uuid4
 
 from pytest import fail
 
+from application.services import UnitOfWork
 from domain.shared.unit import NonEmptyStr
 from domain.model.result import DuelResult, FirstOrSecond, ResultChar
-from domain.repository import UnitOfWork
 
 
 def make_duel_result(

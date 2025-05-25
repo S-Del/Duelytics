@@ -11,9 +11,9 @@ from application.exception.application_critical_error import ApplicationCritical
 from application.result.register import (
     RegisterResultCommand, RegisterResultScenario
 )
+from application.services import UnitOfWork
 from domain.model.note import Note
 from domain.model.result import DuelResult
-from domain.repository import UnitOfWork
 from domain.repository.note import NoteCommandRepository
 from domain.repository.result import ResultCommandRepository
 

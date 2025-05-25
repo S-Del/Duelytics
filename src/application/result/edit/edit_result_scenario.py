@@ -9,9 +9,9 @@ from application.deck.register.use_case import (
 from application.exception import (
     ApplicationCriticalError, DomainObjectCreationError
 )
+from application.services import UnitOfWork
 from domain.model.result import FirstOrSecond, ResultChar
 from domain.model.note import Note
-from domain.repository import UnitOfWork
 from domain.repository.note import NoteCommandRepository, NoteQueryRepository
 from domain.repository.result import (
     UpdateResultCommand, ResultCommandRepository

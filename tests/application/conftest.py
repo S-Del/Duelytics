@@ -7,6 +7,7 @@ from application.result.edit import EditResultScenario
 from application.result.fetch import FetchResultWithRecord
 from application.result.fetch.use_case import FetchResultById
 from application.result.register import RegisterResultScenario
+from application.services import UnitOfWork
 from application.services.file import IDeckNameFileInitializer
 from domain.repository.deck import (
     DeckNameQueryRepository, DeckNameCommandRepository
@@ -15,8 +16,6 @@ from domain.repository.note import NoteCommandRepository, NoteQueryRepository
 from domain.repository.result import (
     ResultCommandRepository, ResultQueryRepository
 )
-from domain.repository import UnitOfWork
-
 
 ##### モック達 #####
 @fixture

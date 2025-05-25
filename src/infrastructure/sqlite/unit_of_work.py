@@ -2,7 +2,7 @@ from logging import getLogger
 from sqlite3 import connect, Connection
 from types import TracebackType
 
-from domain.repository.unit_of_work import UnitOfWork
+from application.services import UnitOfWork
 from infrastructure.sqlite.config import DatabaseConfig
 
 

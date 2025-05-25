@@ -4,7 +4,7 @@ from sqlite3 import Error as SQLiteError
 
 from application.exception import ApplicationCriticalError
 from application.result import IdForResult
-from domain.repository import UnitOfWork
+from application.services import UnitOfWork
 from domain.repository.result import ResultCommandRepository
 
 
