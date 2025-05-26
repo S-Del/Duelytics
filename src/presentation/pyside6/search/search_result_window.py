@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 
-from application.result.fetch import EncounteredDeckData, RecordData
+from application.result.fetch.use_case import EncounteredDeckData, RecordData
 from . import (
     DeckDistributionGroup,
     DisplayRecordGroup,

@@ -1,7 +1,7 @@
 from datetime import date, datetime, time
 from typing import Any, Literal, Sequence
 
-from domain.repository.result import FetchResultQuery
+from domain.repository.result import SearchResultsQuery
 from infrastructure.sqlite.config.table import ResultTableConfig
 
 
@@ -78,7 +78,7 @@ class SearchConditionBuilder:
         self._params.append(date_time_str)
         return self
 
-    def build(self, query: FetchResultQuery) -> tuple[str, list[Any]]:
+    def build(self, query: SearchResultsQuery) -> tuple[str, list[Any]]:
         first_or_second = query.get("first_or_second")
         if first_or_second:
             self.add_in(

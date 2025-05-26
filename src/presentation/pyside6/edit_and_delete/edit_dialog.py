@@ -15,7 +15,7 @@ from application.exception import (
 )
 from application.exception.invalid_command_error import InvalidCommandError
 from application.result.edit import EditResultCommand, EditResultScenario
-from application.result.fetch.use_case import FetchResultData
+from application.result.fetch.use_case import ResultData
 from presentation.events import StatusBarMessageEvent
 from presentation.pyside6.shared import (
     DeckNameInputGroup,
@@ -28,7 +28,7 @@ from presentation.pyside6.shared import (
 class EditDialog(QDialog):
     def __init__(self,
         parent: QWidget | None,
-        target: FetchResultData,
+        target: ResultData,
         edit_result: EditResultScenario,
         event_aggregator: EventAggregator
     ):

@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QGroupBox, QFormLayout, QFrame, QLabel
 
-from application.result.fetch import RecordData
+from application.result.fetch.use_case import RecordData
 
 
 class DisplayRecordGroup(QGroupBox):

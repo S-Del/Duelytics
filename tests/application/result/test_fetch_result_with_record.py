@@ -1,9 +1,9 @@
 from datetime import date
 from uuid import UUID, uuid4
 
-from application.result.fetch import FetchResultWithRecord
+from application.result.fetch.use_case import FetchResultsByQuery
 from domain.model.result import FirstOrSecond, ResultChar, DuelResult
-from domain.repository.result import FetchResultQuery, ResultQueryRepository
+from domain.repository.result import SearchResultsQuery, ResultQueryRepository
 from domain.shared.unit import NonEmptyStr, PositiveInt
 
 
@@ -15,10 +15,10 @@ class SpyResultQueryRepository(ResultQueryRepository):
     """
 
     def __init__(self):
-        self._last_query: FetchResultQuery | None = None
+        self._last_query: SearchResultsQuery | None = None
         self._last_id: UUID | None = None
 
-    def search(self, query: FetchResultQuery) -> tuple[DuelResult]:
+    def search(self, query: SearchResultsQuery) -> tuple[DuelResult]:
         self._last_query = query
         return tuple() # 返す値は不要
 
@@ -29,7 +29,7 @@ class SpyResultQueryRepository(ResultQueryRepository):
 
 def test_builds_correct_fetch_query():
     repository = SpyResultQueryRepository()
-    fetch_result = FetchResultWithRecord(repository)
+    fetch_result = FetchResultsByQuery(repository)
     # ID を指定した場合の検証
     id = uuid4()
     fetch_result.handle({
@@ -49,7 +49,7 @@ def test_builds_correct_fetch_query():
     assert repository._last_id == id
 
     repository = SpyResultQueryRepository()
-    fetch_result = FetchResultWithRecord(repository)
+    fetch_result = FetchResultsByQuery(repository)
     # ID が指定されなかった場合の検証
     fetch_result.handle({
         "first_or_second": ['F'],

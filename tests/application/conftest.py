@@ -4,8 +4,9 @@ from unittest.mock import MagicMock
 from application.deck.register.use_case import RegisterDeckIfNotExists
 from application.result.delete.use_case import DeleteResultById
 from application.result.edit import EditResultScenario
-from application.result.fetch import FetchResultWithRecord
-from application.result.fetch.use_case import FetchResultById
+from application.result.fetch.use_case import (
+    FetchResultById, FetchResultsByQuery
+)
 from application.result.register import RegisterResultScenario
 from application.services import UnitOfWork
 from application.services.file import IDeckNameFileInitializer
@@ -106,8 +107,8 @@ def delete_result_by_id_mock() -> MagicMock:
 @fixture
 def fetch_result_with_record(
     result_query_repository_mock: ResultQueryRepository
-) -> FetchResultWithRecord:
-    return FetchResultWithRecord(result_query_repository_mock)
+) -> FetchResultsByQuery:
+    return FetchResultsByQuery(result_query_repository_mock)
 
 
 @fixture

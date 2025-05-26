@@ -18,7 +18,7 @@ from application.exception import ApplicationCriticalError, InvalidCommandError
 from application.result import IdForResult
 from application.result.delete.use_case import DeleteResultById
 from application.result.edit import EditResultScenario
-from application.result.fetch.use_case import FetchResultData, FetchResultById
+from application.result.fetch.use_case import ResultData, FetchResultById
 from . import EditDialog
 
 
@@ -37,7 +37,7 @@ class Tab(QWidget):
         self._fetch_result_by_id = fetch_result_by_id
         self._delete_result_by_id = delete_result_by_id
         self._edit_result = edit_result
-        self._target: FetchResultData | None = None
+        self._target: ResultData | None = None
 
         label = QLabel("ID (必須)")
         self._input = QLineEdit()

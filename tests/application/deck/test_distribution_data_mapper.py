@@ -1,4 +1,4 @@
-from application.result.fetch.distribution_data_mapper import DistributionDataMapper
+from application.result.fetch.use_case import DistributionDataMapper
 from domain.model.deck import DeckDistribution
 from domain.model.result import FirstOrSecond, ResultChar
 from domain.shared.unit.non_empty_str import NonEmptyStr

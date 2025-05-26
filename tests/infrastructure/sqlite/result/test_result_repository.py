@@ -3,7 +3,7 @@ from sqlite3 import connect
 from pytest import fixture
 
 from domain.model.result import FirstOrSecond, ResultChar
-from domain.repository.result import FetchResultQuery, UpdateResultCommand
+from domain.repository.result import SearchResultsQuery, UpdateResultCommand
 from domain.shared.unit import NonEmptyStr, PositiveInt
 from infrastructure.sqlite import SQLiteUnitOfWork
 from infrastructure.sqlite.config import DatabaseConfig
@@ -48,7 +48,7 @@ def test_crud_flow(
 ):
     # 空の query で全件取得し、件数が 0 であるか検証。
     delete_all()
-    query: FetchResultQuery = {}
+    query: SearchResultsQuery = {}
     count = len(query_repository.search(query))
     assert count == 0
 
@@ -138,7 +138,7 @@ def insert_test_data(
             command_repository.register(duel)
 
     # 空の query で全件取得し、件数を検証。
-    query: FetchResultQuery = {}
+    query: SearchResultsQuery = {}
     count = len(query_repository.search(query))
     assert count == 5
 

@@ -4,7 +4,7 @@ from PySide6.QtCore import (
 )
 from PySide6.QtGui import QColor
 
-from application.result.fetch.use_case import FetchResultData
+from application.result.fetch.use_case import ResultData
 
 
 class SearchResultTableModel(QAbstractTableModel):
@@ -18,7 +18,7 @@ class SearchResultTableModel(QAbstractTableModel):
         "ID"
     ]
 
-    def __init__(self, results: list[FetchResultData]):
+    def __init__(self, results: list[ResultData]):
         super().__init__()
         self._results = results
 

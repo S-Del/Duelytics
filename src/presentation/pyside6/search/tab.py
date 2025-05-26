@@ -11,7 +11,9 @@ from application.events import EventAggregator
 from application.exception import (
     ApplicationCriticalError, ApplicationOperationWarning
 )
-from application.result.fetch import FetchResultRequest, FetchResultWithRecord
+from application.result.fetch.use_case import (
+    FetchResultsRequest, FetchResultsByQuery
+)
 from presentation.events.status_bar_message_event import StatusBarMessageEvent
 from .advanced_search import AdvancedSearchGroup
 from . import (
@@ -31,7 +33,7 @@ class Tab(QWidget):
     @inject
     def __init__(self,
         event_aggregator: EventAggregator,
-        fetch_result_with_record: FetchResultWithRecord,
+        fetch_result_with_record: FetchResultsByQuery,
         fetch_all_deck_name: FetchAllDeckName
     ):
         super().__init__()
@@ -101,7 +103,7 @@ class Tab(QWidget):
         self._advanced_search_group.reset()
 
     def on_click_search_button(self):
-        request: FetchResultRequest = {}
+        request: FetchResultsRequest = {}
         if self._id_input_group.id:
             request["id"] = self._id_input_group.id
         request["first_or_second"] = self._first_or_second_checkbox_group.values
@@ -150,7 +152,7 @@ class Tab(QWidget):
             fetch_result.win_rate_trend_data
         )
         search_result_window.update_table(
-            SearchResultTableModel(fetch_result.data_list)
+            SearchResultTableModel(fetch_result.result_data_list)
         )
         search_result_window.resize(1280, 720)
         search_result_window.show()

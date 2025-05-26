@@ -12,7 +12,7 @@ from PySide6.QtWidgets import QGroupBox, QSplitter, QVBoxLayout
 from PySide6.QtGui import QFont, QPainter
 from PySide6.QtCore import QMargins, Qt
 
-from application.result.fetch import EncounteredDeckData
+from application.result.fetch.use_case import EncounteredDeckData
 
 
 class DeckDistributionGroup(QGroupBox):
