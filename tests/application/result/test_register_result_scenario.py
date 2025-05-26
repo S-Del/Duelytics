@@ -1,13 +1,12 @@
 from datetime import datetime
 from sqlite3 import Error as SQLiteError
+from pytest import raises
 from typing import cast
 from unittest.mock import MagicMock
 from uuid import UUID
 
-from pytest import raises
-
 from application.deck.register.use_case import RegisterDeckIfNotExists
-from application.exception.application_critical_error import ApplicationCriticalError
+from application.exception import ApplicationCriticalError
 from application.result.register import (
     RegisterResultCommand, RegisterResultScenario
 )

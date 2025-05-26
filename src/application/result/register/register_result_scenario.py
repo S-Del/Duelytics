@@ -18,6 +18,7 @@ from domain.repository.result import ResultCommandRepository
 from domain.shared.unit import NonEmptyStr
 from . import RegisterResultCommand
 
+
 class RegisterResultScenario:
     @inject
     def __init__(self,

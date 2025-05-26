@@ -1,9 +1,8 @@
-from datetime import datetime
 from contextlib import contextmanager
+from datetime import datetime
+from pytest import fail
 from typing import Literal, Type
 from uuid import UUID, uuid4
-
-from pytest import fail
 
 from application.services import UnitOfWork
 from domain.shared.unit import NonEmptyStr

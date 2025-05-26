@@ -5,7 +5,7 @@ from application.events import EventAggregator
 from application.result.edit.edit_result_scenario import EditResultScenario
 from application.result.register import RegisterResultScenario
 from application.services import UnitOfWork
-from application.services.file.deck_name_file_initializer import IDeckNameFileInitializer
+from application.services.file import IDeckNameFileInitializer
 from application.services.startup import StartupMessageService
 from domain.repository.result import (
     ResultCommandRepository, ResultQueryRepository
