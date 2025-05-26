@@ -14,8 +14,8 @@ from application.exception import (
 from application.result.fetch.use_case import (
     FetchResultsRequest, FetchResultsByQuery
 )
-from presentation.events.status_bar_message_event import StatusBarMessageEvent
-from .advanced_search import AdvancedSearchGroup
+from presentation.pyside6.event import StatusBarMessageEvent
+from presentation.pyside6.search.advanced_search import AdvancedSearchGroup
 from . import (
     IdInputGroup,
     FirstOrSecondCheckboxGroup,

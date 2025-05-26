@@ -1,2 +1,1 @@
 from .presentation_event import PresentationEvent
-from .status_bar_message_event import StatusBarMessageEvent

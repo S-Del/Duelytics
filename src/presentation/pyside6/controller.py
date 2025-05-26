@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
 
 from application.events import EventAggregator
 from application.services.startup import StartupMessageService
-from presentation.events.status_bar_message_event import StatusBarMessageEvent
+from presentation.pyside6.event import StatusBarMessageEvent
 from presentation.pyside6.register import Tab as RegisterTab
 from presentation.pyside6.search import Tab as SearchTab
 from presentation.pyside6.edit_and_delete import Tab as EditAndDeleteTab
