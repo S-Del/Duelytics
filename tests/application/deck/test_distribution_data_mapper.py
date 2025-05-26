@@ -1,45 +1,19 @@
 from application.result.fetch.use_case import DistributionDataMapper
 from domain.model.deck import DeckDistribution
-from domain.model.result import FirstOrSecond, ResultChar
-from domain.shared.unit.non_empty_str import NonEmptyStr
-from tests.helpers import make_result
+from tests.helpers import make_duel_result
 
 def test_top_n_with_other():
     distribution = DeckDistribution([
-        make_result(FirstOrSecond('F'), ResultChar('W')),
-        make_result(FirstOrSecond('F'), ResultChar('W')),
-        make_result(FirstOrSecond('F'), ResultChar('W')),
-        make_result(FirstOrSecond('F'), ResultChar('W')),
-        make_result(
-            FirstOrSecond('F'),
-            ResultChar('W'),
-            opponent_deck_name=NonEmptyStr("DECK1")
-        ),
-        make_result(
-            FirstOrSecond('F'),
-            ResultChar('W'),
-            opponent_deck_name=NonEmptyStr("DECK1")
-        ),
-        make_result(
-            FirstOrSecond('F'),
-            ResultChar('W'),
-            opponent_deck_name=NonEmptyStr("DECK1")
-        ),
-        make_result(
-            FirstOrSecond('F'),
-            ResultChar('W'),
-            opponent_deck_name=NonEmptyStr("DECK2")
-        ),
-        make_result(
-            FirstOrSecond('F'),
-            ResultChar('W'),
-            opponent_deck_name=NonEmptyStr("DECK2")
-        ),
-        make_result(
-            FirstOrSecond('F'),
-            ResultChar('W'),
-            opponent_deck_name=NonEmptyStr("DECK3")
-        )
+        make_duel_result(),
+        make_duel_result(),
+        make_duel_result(),
+        make_duel_result(),
+        make_duel_result(opponent_deck_name="DECK1"),
+        make_duel_result(opponent_deck_name="DECK1"),
+        make_duel_result(opponent_deck_name="DECK1"),
+        make_duel_result(opponent_deck_name="DECK2"),
+        make_duel_result(opponent_deck_name="DECK2"),
+        make_duel_result(opponent_deck_name="DECK3")
     ])
 
     data_list = DistributionDataMapper(distribution).top_n_with_other(3)

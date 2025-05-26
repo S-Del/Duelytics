@@ -12,7 +12,7 @@ from infrastructure.sqlite.result import (
     SQLiteResultCommandRepository, SQLiteResultQueryRepository
 )
 from infrastructure.sqlite.result import SearchConditionBuilder
-from tests.helpers import make_result
+from tests.helpers import make_duel_result
 
 
 def delete_all():
@@ -53,7 +53,7 @@ def test_crud_flow(
     assert count == 0
 
     # テスト用の試合結果を作成して INSERT
-    result = make_result(FirstOrSecond.FIRST, ResultChar.WIN)
+    result = make_duel_result(first_or_second_char='F', result_char='W')
     with uow:
         command_repository.register(result)
 
@@ -103,35 +103,35 @@ def insert_test_data(
     command_repository: SQLiteResultCommandRepository,
     query_repository: SQLiteResultQueryRepository
 ):
-    results = (
-        make_result(
-            FirstOrSecond.FIRST, ResultChar.WIN,
-            NonEmptyStr("メタビート"), NonEmptyStr("ティアラメンツ"),
-            datetime.fromisoformat("2023-01-01")
-        ),
-        make_result(
-            FirstOrSecond.SECOND, ResultChar.LOSS,
-            NonEmptyStr("ドラゴンリンク"), NonEmptyStr("ふわんだりぃず"),
-            datetime.fromisoformat("2024-01-01")
-        ),
-        make_result(
-            FirstOrSecond.FIRST, ResultChar.LOSS,
-            NonEmptyStr("ドラゴンリンク"), NonEmptyStr("ティアラメンツ"),
-            datetime.fromisoformat("2024-01-01")
-        ),
-        make_result(
-            FirstOrSecond.SECOND, ResultChar.WIN,
-            NonEmptyStr("メタビート"), NonEmptyStr("ふわんだりぃず"),
-            datetime.fromisoformat("2024-01-01")
-        ),
-        make_result(
-            FirstOrSecond.SECOND, ResultChar.DRAW,
-            NonEmptyStr("ラビュリンス"), NonEmptyStr("クシャトリラ"),
-            datetime.fromisoformat("2025-01-01")
-        )
-    )
-
     delete_all()
+
+    results = [
+        make_duel_result(
+            first_or_second_char='F', result_char='W',
+            my_deck_name="メタビート", opponent_deck_name="ティアラメンツ",
+            registered_at=datetime.fromisoformat("2023-01-01")
+        ),
+        make_duel_result(
+            first_or_second_char='S', result_char='L',
+            my_deck_name="ドラゴンリンク", opponent_deck_name="ふわんだりぃず",
+            registered_at=datetime.fromisoformat("2024-01-01")
+        ),
+        make_duel_result(
+            first_or_second_char='F', result_char='L',
+            my_deck_name="ドラゴンリンク", opponent_deck_name="ティアラメンツ",
+            registered_at=datetime.fromisoformat("2024-01-01")
+        ),
+        make_duel_result(
+            first_or_second_char='S', result_char='W',
+            my_deck_name="メタビート", opponent_deck_name="ふわんだりぃず",
+            registered_at=datetime.fromisoformat("2024-01-01")
+        ),
+        make_duel_result(
+            first_or_second_char='S', result_char='D',
+            my_deck_name="ラビュリンス", opponent_deck_name="クシャトリラ",
+            registered_at=datetime.fromisoformat("2025-01-01")
+        )
+    ]
 
     with uow:
         for duel in results:
