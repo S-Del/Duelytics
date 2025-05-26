@@ -14,7 +14,7 @@ from application.exception import (
 from application.result.register import (
     RegisterResultCommand, RegisterResultScenario
 )
-from presentation.events import StatusBarMessageEvent
+from presentation.pyside6.event import StatusBarMessageEvent
 from presentation.pyside6.shared import (
     FirstOrSecondRadioGroup,
     ResultRadioGroup,

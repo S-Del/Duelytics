@@ -16,7 +16,7 @@ from application.exception import (
 from application.exception.invalid_command_error import InvalidCommandError
 from application.result.edit import EditResultCommand, EditResultScenario
 from application.result.fetch.use_case import ResultData
-from presentation.events import StatusBarMessageEvent
+from presentation.pyside6.event import StatusBarMessageEvent
 from presentation.pyside6.shared import (
     DeckNameInputGroup,
     FirstOrSecondRadioGroup,
