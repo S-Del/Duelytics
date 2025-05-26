@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from . import PresentationEvent
+from presentation.events import PresentationEvent
 
 
 @dataclass(frozen=True)

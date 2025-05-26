@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 
 from domain.model.result import DuelResult
-from . import FetchResultQuery
+from . import SearchResultsQuery
 
 
 class ResultQueryRepository(ABC):
@@ -11,5 +11,5 @@ class ResultQueryRepository(ABC):
         pass
 
     @abstractmethod
-    def search(self, query: FetchResultQuery) -> tuple[DuelResult]:
+    def search(self, query: SearchResultsQuery) -> tuple[DuelResult]:
         pass

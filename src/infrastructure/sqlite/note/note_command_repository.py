@@ -2,8 +2,8 @@ from uuid import UUID
 from injector import inject
 from logging import getLogger
 
+from application.services import UnitOfWork
 from domain.model.note import Note
-from domain.repository import UnitOfWork
 from domain.repository.note import NoteCommandRepository
 from infrastructure.sqlite import SQLiteUnitOfWork
 from infrastructure.sqlite.config.table import NoteTableConfig
@@ -15,11 +15,7 @@ class SQLiteNoteCommandRepository(NoteCommandRepository):
         if not isinstance(uow, SQLiteUnitOfWork):
             raise TypeError(f"UnitOfWork の型が不正 {uow}")
         self._uow = uow
-        self._logger = getLogger()
-
-    @property
-    def uow(self) -> SQLiteUnitOfWork:
-        return self._uow
+        self._logger = getLogger(__name__)
 
     def delete_by_id(self, id: UUID):
         sql = " ".join([
@@ -32,7 +28,7 @@ class SQLiteNoteCommandRepository(NoteCommandRepository):
             f"\tsql: {sql}",
             f"\tparam: {param}"
         ]))
-        connection = self.uow.get_sqlite_connection()
+        connection = self._uow.get_sqlite_connection()
         connection.execute(sql, param)
 
     def register(self, note: Note):
@@ -43,7 +39,7 @@ class SQLiteNoteCommandRepository(NoteCommandRepository):
             f"\tsql: {sql}",
             f"\tparams: {params}"
         ]))
-        connection = self.uow.get_sqlite_connection()
+        connection = self._uow.get_sqlite_connection()
         connection.execute(sql, params)
 
     def upsert(self, note: Note):
@@ -59,5 +55,5 @@ class SQLiteNoteCommandRepository(NoteCommandRepository):
             f"\tsql: {sql}",
             f"\tparams: {params}"
         ]))
-        connection = self.uow.get_sqlite_connection()
+        connection = self._uow.get_sqlite_connection()
         connection.execute(sql, params)

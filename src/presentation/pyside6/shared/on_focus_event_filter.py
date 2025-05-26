@@ -9,10 +9,10 @@ class OnFocusEventFilter(QObject):
         parent: QWidget | None = None
     ):
         super().__init__(parent)
-        self.on_focus = on_focus
+        self._on_focus = on_focus
 
     def eventFilter(self, watched: QObject, event: QEvent) -> bool:
         if event.type() == QEvent.Type.FocusIn:
-            self.on_focus()
+            self._on_focus()
 
         return super().eventFilter(watched, event)

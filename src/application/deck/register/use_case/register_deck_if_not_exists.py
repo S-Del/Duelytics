@@ -25,19 +25,19 @@ class RegisterDeckIfNotExists:
         command_repository: DeckNameCommandRepository,
         deck_file_initializer: IDeckNameFileInitializer
     ):
-        self.query_repository = query_repository
-        self.command_repository = command_repository
+        self._query_repository = query_repository
+        self._command_repository = command_repository
         self._deck_file_initializer = deck_file_initializer
-        self._logger = getLogger()
+        self._logger = getLogger(__name__)
 
     def handle(self, command: RegisterDeckCommand):
         self._logger.info(f"デッキ名の登録開始: {command.name}")
         try:
-            if self.query_repository.exists(NonEmptyStr(command.name)):
+            if self._query_repository.exists(NonEmptyStr(command.name)):
                 self._logger.info(f"登録済みデッキ名のためスキップ")
                 return
 
-            self.command_repository.add(NonEmptyStr(command.name))
+            self._command_repository.add(NonEmptyStr(command.name))
         except ValueError as ve:
             # RegisterDeckCommand が生成された時点で、
             # name の値はバリデーションされているが念のため。

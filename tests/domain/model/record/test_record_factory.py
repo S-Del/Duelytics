@@ -2,16 +2,15 @@ from pytest import mark
 from typing import Sequence
 
 from domain.model.record import RecordFactory
-from domain.model.result import FirstOrSecond, ResultChar
-from tests.helpers import make_result
+from tests.helpers import make_duel_result
 
 
 @mark.parametrize(
     "results",
     [[
-        make_result(FirstOrSecond.FIRST, ResultChar.WIN),
-        make_result(FirstOrSecond.SECOND, ResultChar.LOSS),
-        make_result(FirstOrSecond.FIRST, ResultChar.DRAW)
+        make_duel_result(first_or_second_char='F', result_char='W'),
+        make_duel_result(first_or_second_char='S', result_char='L'),
+        make_duel_result(first_or_second_char='F', result_char='D')
     ]]
 )
 def test_record_factory(results: Sequence):

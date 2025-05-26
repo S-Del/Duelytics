@@ -15,8 +15,8 @@ from application.exception import (
 )
 from application.exception.invalid_command_error import InvalidCommandError
 from application.result.edit import EditResultCommand, EditResultScenario
-from application.result.fetch.use_case import FetchResultData
-from presentation.events import StatusBarMessageEvent
+from application.result.fetch.use_case import ResultData
+from presentation.pyside6.event import StatusBarMessageEvent
 from presentation.pyside6.shared import (
     DeckNameInputGroup,
     FirstOrSecondRadioGroup,
@@ -28,40 +28,40 @@ from presentation.pyside6.shared import (
 class EditDialog(QDialog):
     def __init__(self,
         parent: QWidget | None,
-        target: FetchResultData,
+        target: ResultData,
         edit_result: EditResultScenario,
         event_aggregator: EventAggregator
     ):
         super().__init__(parent)
         self.setWindowTitle("試合結果 編集")
         self._event_aggregator = event_aggregator
-        self.target = target
-        self.edit_result = edit_result
-        self.first_or_second_group = FirstOrSecondRadioGroup()
-        self.first_or_second_group.value = target.first_or_second_raw
-        self.result_group = ResultRadioGroup()
-        self.result_group.value = target.result_raw
-        self.deck_name_group = DeckNameInputGroup()
-        self.deck_name_group.my_deck_name = target.my_deck_name
-        self.deck_name_group.opponent_deck_name = target.opponent_deck_name
-        self.note_group = NoteInputGroup()
+        self._target = target
+        self._edit_result = edit_result
+        self._first_or_second_group = FirstOrSecondRadioGroup()
+        self._first_or_second_group.value = target.first_or_second_raw
+        self._result_group = ResultRadioGroup()
+        self._result_group.value = target.result_raw
+        self._deck_name_group = DeckNameInputGroup()
+        self._deck_name_group.my_deck_name = target.my_deck_name
+        self._deck_name_group.opponent_deck_name = target.opponent_deck_name
+        self._note_group = NoteInputGroup()
         if target.note:
-            self.note_group.value = target.note
+            self._note_group.value = target.note
 
         form_layout = QGridLayout()
-        form_layout.addWidget(self.first_or_second_group, 0, 0)
-        form_layout.addWidget(self.result_group, 0, 1)
-        form_layout.addWidget(self.deck_name_group, 0, 2)
-        form_layout.addWidget(self.note_group, 1, 0, 1, 3)
+        form_layout.addWidget(self._first_or_second_group, 0, 0)
+        form_layout.addWidget(self._result_group, 0, 1)
+        form_layout.addWidget(self._deck_name_group, 0, 2)
+        form_layout.addWidget(self._note_group, 1, 0, 1, 3)
 
-        self.cancel_button = QPushButton("キャンセル")
-        self.cancel_button.clicked.connect(self.reject)
-        self.accept_button = QPushButton("続行")
-        self.accept_button.clicked.connect(self.on_click_accept_button)
+        self._cancel_button = QPushButton("キャンセル")
+        self._cancel_button.clicked.connect(self.reject)
+        self._accept_button = QPushButton("続行")
+        self._accept_button.clicked.connect(self.on_click_accept_button)
         button_layout = QHBoxLayout()
         button_layout.addStretch(1)
-        button_layout.addWidget(self.cancel_button)
-        button_layout.addWidget(self.accept_button)
+        button_layout.addWidget(self._cancel_button)
+        button_layout.addWidget(self._accept_button)
 
         layout = QVBoxLayout()
         layout.addLayout(form_layout)
@@ -71,14 +71,14 @@ class EditDialog(QDialog):
 
     def on_click_accept_button(self):
         try:
-            self.edit_result.handle(
+            self._edit_result.handle(
                 EditResultCommand(
-                    self.target.id,
-                    self.first_or_second_group.value,
-                    self.result_group.value,
-                    self.deck_name_group.my_deck_name,
-                    self.deck_name_group.opponent_deck_name,
-                    self.note_group.value
+                    self._target.id,
+                    self._first_or_second_group.value,
+                    self._result_group.value,
+                    self._deck_name_group.my_deck_name,
+                    self._deck_name_group.opponent_deck_name,
+                    self._note_group.value
                 )
             )
             QMessageBox.information(self,

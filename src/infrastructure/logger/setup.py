@@ -2,10 +2,18 @@ from datetime import date
 from logging import DEBUG, basicConfig, getLogger, INFO, FileHandler, Formatter
 from os.path import join
 from pathlib import Path
+import sys
 
 
 def init_logger():
-    basicConfig(level=INFO)
+    # pyinstaller によってバンドルされたバイナリかどうか判定している
+    is_bundle = getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
+    if is_bundle:
+        level = INFO
+    else:
+        level = DEBUG
+
+    basicConfig(level=level)
     logger = getLogger()
     if logger.handlers:
         for handler in logger.handlers[:]:

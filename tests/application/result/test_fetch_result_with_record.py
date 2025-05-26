@@ -1,9 +1,9 @@
 from datetime import date
 from uuid import UUID, uuid4
 
-from application.result.fetch import FetchResultWithRecord
+from application.result.fetch.use_case import FetchResultsByQuery
 from domain.model.result import FirstOrSecond, ResultChar, DuelResult
-from domain.repository.result import FetchResultQuery, ResultQueryRepository
+from domain.repository.result import SearchResultsQuery, ResultQueryRepository
 from domain.shared.unit import NonEmptyStr, PositiveInt
 
 
@@ -15,21 +15,21 @@ class SpyResultQueryRepository(ResultQueryRepository):
     """
 
     def __init__(self):
-        self.last_query: FetchResultQuery | None = None
-        self.last_id: UUID | None = None
+        self._last_query: SearchResultsQuery | None = None
+        self._last_id: UUID | None = None
 
-    def search(self, query: FetchResultQuery) -> tuple[DuelResult]:
-        self.last_query = query
+    def search(self, query: SearchResultsQuery) -> tuple[DuelResult]:
+        self._last_query = query
         return tuple() # 返す値は不要
 
     def search_by_id(self, id: UUID) -> DuelResult | None:
-        self.last_id = id
+        self._last_id = id
         return None # 返す値は不要
 
 
 def test_builds_correct_fetch_query():
     repository = SpyResultQueryRepository()
-    fetch_result = FetchResultWithRecord(repository)
+    fetch_result = FetchResultsByQuery(repository)
     # ID を指定した場合の検証
     id = uuid4()
     fetch_result.handle({
@@ -45,11 +45,11 @@ def test_builds_correct_fetch_query():
     })
     # query は作成されず last_query は None で、
     # ID のみでの検索が行われていなければならない。
-    assert repository.last_query is None
-    assert repository.last_id == id
+    assert repository._last_query is None
+    assert repository._last_id == id
 
     repository = SpyResultQueryRepository()
-    fetch_result = FetchResultWithRecord(repository)
+    fetch_result = FetchResultsByQuery(repository)
     # ID が指定されなかった場合の検証
     fetch_result.handle({
         "first_or_second": ['F'],
@@ -63,7 +63,7 @@ def test_builds_correct_fetch_query():
         "limit": 50
     })
     # query が作成され、指定したパラメータをすべて取得できなければならない。
-    query = repository.last_query
+    query = repository._last_query
     assert query is not None
     assert query.get("first_or_second") == [FirstOrSecond.FIRST]
     assert query.get("result") == [ResultChar.WIN]

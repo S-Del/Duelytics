@@ -1,2 +1,5 @@
-class ApplicationCriticalError(Exception):
+from . import ApplicationError
+
+
+class ApplicationCriticalError(ApplicationError):
     pass

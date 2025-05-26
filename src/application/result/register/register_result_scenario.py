@@ -10,13 +10,14 @@ from application.deck.register.use_case import (
 from application.exception import (
     ApplicationCriticalError, DomainObjectCreationError
 )
+from application.services import UnitOfWork
 from domain.model.note import Note
 from domain.model.result import DuelResult, FirstOrSecond, ResultChar
-from domain.repository import UnitOfWork
 from domain.repository.note import NoteCommandRepository
 from domain.repository.result import ResultCommandRepository
 from domain.shared.unit import NonEmptyStr
 from . import RegisterResultCommand
+
 
 class RegisterResultScenario:
     @inject
@@ -26,11 +27,11 @@ class RegisterResultScenario:
         note_repository: NoteCommandRepository,
         register_deck: RegisterDeckIfNotExists
     ):
-        self.uow = uow
-        self.result_repository = result_repository
-        self.note_repository = note_repository
-        self.register_deck = register_deck
-        self._logger = getLogger()
+        self._uow = uow
+        self._result_repository = result_repository
+        self._note_repository = note_repository
+        self._register_deck = register_deck
+        self._logger = getLogger(__name__)
 
     def execute(self, command: RegisterResultCommand):
         try:
@@ -52,12 +53,12 @@ class RegisterResultScenario:
         # 試合結果（とメモ）の記録
         self._logger.info("試合結果とメモ (あれば) の登録を開始")
         try:
-            with self.uow:
-                self.result_repository.register(duel_result)
+            with self._uow:
+                self._result_repository.register(duel_result)
                 if command.note:
                     self._logger.info("メモの登録を開始")
                     note = Note(duel_result.id_raw, command.note)
-                    self.note_repository.register(note)
+                    self._note_repository.register(note)
         except SQLiteError as se:
             self._logger.critical(f"データベースエラー: {se}")
             raise ApplicationCriticalError from se
@@ -76,4 +77,4 @@ class RegisterResultScenario:
             # ApplicationOperationWarning はここでの追加処理が無い為、
             # 把捉せずそのまま上位へ伝えている。
             # 把捉したプレゼン層がユーザー通知を行うことを期待している。
-            self.register_deck.handle(RegisterDeckCommand(name))
+            self._register_deck.handle(RegisterDeckCommand(name))

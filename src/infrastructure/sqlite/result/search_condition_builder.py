@@ -1,7 +1,7 @@
 from datetime import date, datetime, time
 from typing import Any, Literal, Sequence
 
-from domain.repository.result import FetchResultQuery
+from domain.repository.result import SearchResultsQuery
 from infrastructure.sqlite.config.table import ResultTableConfig
 
 
@@ -10,8 +10,8 @@ SearchType = Literal["exact", "partial", "prefix", "suffix"]
 
 class SearchConditionBuilder:
     def __init__(self):
-        self.conditions: list[str] = []
-        self.params: list[Any] = []
+        self._conditions: list[str] = []
+        self._params: list[Any] = []
 
     @staticmethod
     def escape_like_param(
@@ -38,8 +38,8 @@ class SearchConditionBuilder:
         if not values:
             return self
         place_holders = ", ".join(['?'] * len(values))
-        self.conditions.append(f"{column_name} IN ({place_holders})")
-        self.params.extend(values)
+        self._conditions.append(f"{column_name} IN ({place_holders})")
+        self._params.extend(values)
         return self
 
     def add_like(self,
@@ -48,37 +48,37 @@ class SearchConditionBuilder:
         search_type: SearchType = "exact"
     ) -> "SearchConditionBuilder":
         escaped = SearchConditionBuilder.escape_like_param(value, search_type)
-        self.conditions.append(f"{column_name} LIKE ? ESCAPE '\\'")
-        self.params.append(escaped)
+        self._conditions.append(f"{column_name} LIKE ? ESCAPE '\\'")
+        self._params.append(escaped)
         return self
 
     def add_since(self,
         column_name: str,
         since: date
     ) -> "SearchConditionBuilder":
-        self.conditions.append(f"{column_name} >= ?")
+        self._conditions.append(f"{column_name} >= ?")
         time_str = time.fromisoformat("00:00:00")
         date_time_str = (
             datetime.combine(since, time_str)
                     .isoformat(timespec="seconds")
         )
-        self.params.append(date_time_str)
+        self._params.append(date_time_str)
         return self
 
     def add_until(self,
         column_name: str,
         until: date
     ) -> "SearchConditionBuilder":
-        self.conditions.append(f"{column_name} <= ?")
+        self._conditions.append(f"{column_name} <= ?")
         time_str = time.fromisoformat("23:59:59")
         date_time_str = (
             datetime.combine(until, time_str)
                     .isoformat(timespec="seconds")
         )
-        self.params.append(date_time_str)
+        self._params.append(date_time_str)
         return self
 
-    def build(self, query: FetchResultQuery) -> tuple[str, list[Any]]:
+    def build(self, query: SearchResultsQuery) -> tuple[str, list[Any]]:
         first_or_second = query.get("first_or_second")
         if first_or_second:
             self.add_in(
@@ -123,13 +123,13 @@ class SearchConditionBuilder:
                 until
             )
 
-        if not self.conditions:
+        if not self._conditions:
             return ("", [])
 
-        where_clause = " WHERE " + " AND ".join(self.conditions)
+        where_clause = " WHERE " + " AND ".join(self._conditions)
 #       params はイミュータブルな要素しか持たないため、シャローコピーで充分。
 #       params = deepcopy(self.params)
-        params = list(self.params)
-        self.conditions.clear()
-        self.params.clear()
+        params = list(self._params)
+        self._conditions.clear()
+        self._params.clear()
         return where_clause, params

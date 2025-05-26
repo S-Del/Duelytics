@@ -1,6 +1,7 @@
-from application.result.fetch import EncounteredDeckData
 from domain.model.deck import DeckDistribution, EncounteredDeckStats
 from domain.shared.unit.percentage import Percentage
+
+from . import EncounteredDeckData
 
 
 class DistributionDataMapper:
