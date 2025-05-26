@@ -5,7 +5,7 @@ from domain.model.result import FirstOrSecond, ResultChar
 from domain.shared.unit import NonEmptyStr, PositiveInt
 
 
-class FetchResultQuery(TypedDict, total=False):
+class SearchResultsQuery(TypedDict, total=False):
     first_or_second: Sequence[FirstOrSecond]
     result: Sequence[ResultChar]
     my_deck_name: NonEmptyStr

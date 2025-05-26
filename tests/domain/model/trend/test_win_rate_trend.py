@@ -1,7 +1,6 @@
-from domain.model.result import FirstOrSecond, ResultChar
 from domain.model.trend import WinRateTrend
 from domain.shared.unit.percentage import Percentage
-from tests.helpers import make_result
+from tests.helpers import make_duel_result
 
 
 def test_win_rate_trend():
@@ -9,13 +8,13 @@ def test_win_rate_trend():
     assert trend == tuple()
 
     results = [
-        make_result(FirstOrSecond('F'), ResultChar('W')),
-        make_result(FirstOrSecond('F'), ResultChar('L')),
-        make_result(FirstOrSecond('F'), ResultChar('L')),
-        make_result(FirstOrSecond('F'), ResultChar('W')),
-        make_result(FirstOrSecond('F'), ResultChar('W')),
-        make_result(FirstOrSecond('F'), ResultChar('L')),
-        make_result(FirstOrSecond('F'), ResultChar('W')),
+        make_duel_result(result_char='W'),
+        make_duel_result(result_char='L'),
+        make_duel_result(result_char='L'),
+        make_duel_result(result_char='W'),
+        make_duel_result(result_char='W'),
+        make_duel_result(result_char='L'),
+        make_duel_result(result_char='W')
     ]
     trend = WinRateTrend(results).aggregate()
     assert trend[0] == Percentage.from_ratio(1 / 1)

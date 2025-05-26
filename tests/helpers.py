@@ -1,18 +1,17 @@
-from datetime import datetime
 from contextlib import contextmanager
+from datetime import datetime
+from pytest import fail
 from typing import Literal, Type
 from uuid import UUID, uuid4
 
-from pytest import fail
-
+from application.services import UnitOfWork
 from domain.shared.unit import NonEmptyStr
 from domain.model.result import DuelResult, FirstOrSecond, ResultChar
-from domain.repository import UnitOfWork
 
 
 def make_duel_result(
-    id: UUID = uuid4(),
-    registered_at: datetime = datetime.now(),
+    id: UUID | None = None,
+    registered_at: datetime | None = None,
     first_or_second_char: Literal['F', 'S'] = 'F',
     result_char: Literal['W', 'L', 'D'] = 'W',
     my_deck_name: str = "MY_DECK_NAME",
@@ -20,8 +19,8 @@ def make_duel_result(
     note: str | None = None
 ) -> DuelResult:
     return DuelResult(
-        id,
-        registered_at,
+        id or uuid4(),
+        registered_at or datetime.now(),
         FirstOrSecond(first_or_second_char),
         ResultChar(result_char),
         NonEmptyStr(my_deck_name),
@@ -29,25 +28,6 @@ def make_duel_result(
         note
     )
 
-
-# ToDo: 上記の make_deul_result に置き換える
-def make_result(
-    first_or_second: FirstOrSecond,
-    result: ResultChar,
-    my_deck_name = NonEmptyStr("MY_DECK_NAME"),
-    opponent_deck_name = NonEmptyStr("OPPONENT_DECK_NAME"),
-    registered_at: datetime | None = None,
-    note: str | None = None
-) -> DuelResult:
-    return DuelResult(
-        uuid4(),
-        registered_at or datetime.now(),
-        first_or_second,
-        result,
-        my_deck_name,
-        opponent_deck_name,
-        note
-    )
 
 @contextmanager
 def expect_uow_rollback_on_error(

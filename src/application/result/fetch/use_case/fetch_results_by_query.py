@@ -7,23 +7,27 @@ from sqlite3 import Error as SQLiteError
 from application.exception import (
     ApplicationCriticalError, DomainObjectCreationError
 )
-from application.result.fetch import DistributionDataMapper
-from application.result.fetch.use_case import ResultDataMapper
 from domain.model.deck import DeckDistribution
 from domain.model.record import RecordFactory, Record
 from domain.model.result import FirstOrSecond, ResultChar
 from domain.model.trend import WinRateTrend
-from domain.repository.result import FetchResultQuery, ResultQueryRepository
+from domain.repository.result import SearchResultsQuery, ResultQueryRepository
 from domain.repository.result.exception import RepositoryDataError
 from domain.shared.unit import NonEmptyStr, PositiveInt
-from . import FetchResultRequest, FetchResultResponse, RecordData
+from . import (
+    DistributionDataMapper,
+    FetchResultsRequest,
+    FetchResultsResponse,
+    RecordData,
+    ResultDataMapper
+)
 
 
-class FetchResultWithRecord:
+class FetchResultsByQuery:
     @inject
     def __init__(self, repository: ResultQueryRepository):
-        self.repository = repository
-        self._logger = getLogger()
+        self._repository = repository
+        self._logger = getLogger(__name__)
 
     def _convert_to_record_data(self, record: Record) -> RecordData:
         return RecordData(
@@ -40,17 +44,17 @@ class FetchResultWithRecord:
             str(record.second_win_rate)
         )
 
-    def _fetch_by_id(self, id: str | None) -> FetchResultResponse | None:
+    def _fetch_by_id(self, id: str | None) -> FetchResultsResponse | None:
         self._logger.info(f"ID での検索を開始: {id}")
         try:
-            result = self.repository.search_by_id(UUID(id))
+            result = self._repository.search_by_id(UUID(id))
             if not result:
                 return None
             record = RecordFactory([result]).create()
             self._logger.info(f"ID での検索完了")
             mapper = DistributionDataMapper(DeckDistribution([result]))
             trend = WinRateTrend([result]).aggregate()
-            return FetchResultResponse(
+            return FetchResultsResponse(
                 ResultDataMapper().to_data_list([result]),
                 self._convert_to_record_data(record),
                 mapper.top_n_with_other(),
@@ -65,15 +69,15 @@ class FetchResultWithRecord:
             raise ApplicationCriticalError from e
 
     def handle(self,
-        request: FetchResultRequest
-    ) -> FetchResultResponse | None:
+        request: FetchResultsRequest
+    ) -> FetchResultsResponse | None:
         id = request.get("id")
         if id:
             # ID の指定がある場合は検索用クエリの作成はせず、
             # 即座に ID での検索結果を返す。
             return self._fetch_by_id(id)
 
-        query: FetchResultQuery = {}
+        query: SearchResultsQuery = {}
 
         first_or_second = request.get("first_or_second")
         if first_or_second:
@@ -148,7 +152,7 @@ class FetchResultWithRecord:
         self._logger.info("試合結果の検索開始")
 
         try:
-            results = self.repository.search(query)
+            results = self._repository.search(query)
         except (SQLiteError, RepositoryDataError) as e:
             self._logger.critical(f"試合結果の検索に失敗: {e}")
             raise ApplicationCriticalError from e
@@ -165,7 +169,7 @@ class FetchResultWithRecord:
         else:
             trend = WinRateTrend(results).aggregate()
 
-        return FetchResultResponse(
+        return FetchResultsResponse(
             ResultDataMapper().to_data_list(results),
             self._convert_to_record_data(RecordFactory(results).create()),
             mapper.top_n_with_other(),

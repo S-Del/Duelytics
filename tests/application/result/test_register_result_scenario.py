@@ -1,19 +1,18 @@
 from datetime import datetime
 from sqlite3 import Error as SQLiteError
+from pytest import raises
 from typing import cast
 from unittest.mock import MagicMock
 from uuid import UUID
 
-from pytest import raises
-
 from application.deck.register.use_case import RegisterDeckIfNotExists
-from application.exception.application_critical_error import ApplicationCriticalError
+from application.exception import ApplicationCriticalError
 from application.result.register import (
     RegisterResultCommand, RegisterResultScenario
 )
+from application.services import UnitOfWork
 from domain.model.note import Note
 from domain.model.result import DuelResult
-from domain.repository import UnitOfWork
 from domain.repository.note import NoteCommandRepository
 from domain.repository.result import ResultCommandRepository
 

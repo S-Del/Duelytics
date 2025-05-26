@@ -12,7 +12,7 @@ from PySide6.QtWidgets import QGroupBox, QSplitter, QVBoxLayout
 from PySide6.QtGui import QFont, QPainter
 from PySide6.QtCore import QMargins, Qt
 
-from application.result.fetch import EncounteredDeckData
+from application.result.fetch.use_case import EncounteredDeckData
 
 
 class DeckDistributionGroup(QGroupBox):
@@ -21,24 +21,24 @@ class DeckDistributionGroup(QGroupBox):
 
         v_splitter = QSplitter(Qt.Orientation.Vertical)
 
-        self.pie_chart = QChart()
-        self.pie_chart.setTitle("遭遇率 Top5 (+その他)")
-        self.pie_chart.setMargins(QMargins(0, 0, 0, 0))
+        self._pie_chart = QChart()
+        self._pie_chart.setTitle("遭遇率 Top5 (+その他)")
+        self._pie_chart.setMargins(QMargins(0, 0, 0, 0))
         pie_title_font = QFont()
         pie_title_font.setBold(True)
-        self.pie_chart.setTitleFont(pie_title_font)
-        pie_chart_view = QChartView(self.pie_chart)
+        self._pie_chart.setTitleFont(pie_title_font)
+        pie_chart_view = QChartView(self._pie_chart)
         pie_chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
         v_splitter.addWidget(pie_chart_view)
 
-        self.h_bar_chart = QChart()
-        self.h_bar_chart.setTitle("対戦回数 Top10 (+その他)")
-        self.h_bar_chart.setMargins(QMargins(0, 0, 0, 0))
-        self.h_bar_chart.legend().setVisible(False)
+        self._h_bar_chart = QChart()
+        self._h_bar_chart.setTitle("対戦回数 Top10 (+その他)")
+        self._h_bar_chart.setMargins(QMargins(0, 0, 0, 0))
+        self._h_bar_chart.legend().setVisible(False)
         h_bar_title_font = QFont()
         h_bar_title_font.setBold(True)
-        h_bar_chart_view = QChartView(self.h_bar_chart)
-        self.h_bar_chart.setTitleFont(h_bar_title_font)
+        h_bar_chart_view = QChartView(self._h_bar_chart)
+        self._h_bar_chart.setTitleFont(h_bar_title_font)
         h_bar_chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
         v_splitter.addWidget(h_bar_chart_view)
 
@@ -47,7 +47,7 @@ class DeckDistributionGroup(QGroupBox):
         self.setLayout(layout)
 
     def update_pie_chart(self, distribution: list[EncounteredDeckData]):
-        self.pie_chart.removeAllSeries()
+        self._pie_chart.removeAllSeries()
         if not distribution:
             return
 
@@ -57,7 +57,7 @@ class DeckDistributionGroup(QGroupBox):
                 f"{data.name} ({data.encounter_rate})", data.count
             )
             series.append(slice)
-        self.pie_chart.addSeries(series)
+        self._pie_chart.addSeries(series)
         series.hovered.connect(self.hovered_slice)
 
     def hovered_slice(self, slice: QPieSlice, state: bool):
@@ -65,7 +65,7 @@ class DeckDistributionGroup(QGroupBox):
         slice.setLabelVisible(state)
 
     def update_h_bar_chart(self, distribution: list[EncounteredDeckData]):
-        self.h_bar_chart.removeAllSeries()
+        self._h_bar_chart.removeAllSeries()
         if not distribution:
             return
 
@@ -79,16 +79,16 @@ class DeckDistributionGroup(QGroupBox):
         axis_x.setTitleText("対戦回数")
         axis_x.setMin(1)
         axis_x.setLabelFormat("%d")
-        self.h_bar_chart.addAxis(axis_x, Qt.AlignmentFlag.AlignBottom)
+        self._h_bar_chart.addAxis(axis_x, Qt.AlignmentFlag.AlignBottom)
 
         axis_y = QBarCategoryAxis()
         axis_y.append(names)
-        self.h_bar_chart.addAxis(axis_y, Qt.AlignmentFlag.AlignLeft)
+        self._h_bar_chart.addAxis(axis_y, Qt.AlignmentFlag.AlignLeft)
 
         series = QHorizontalBarSeries()
         series.append(bar_set)
         series.setLabelsVisible(True)
 
-        self.h_bar_chart.addSeries(series)
+        self._h_bar_chart.addSeries(series)
         series.attachAxis(axis_x)
         series.attachAxis(axis_y)

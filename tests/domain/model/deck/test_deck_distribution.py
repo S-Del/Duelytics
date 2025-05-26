@@ -1,50 +1,21 @@
 from pytest import mark
 from typing import Sequence
 
-from domain.shared.unit import NonEmptyStr
 from domain.model.deck import DeckDistribution
-from domain.model.result import FirstOrSecond, ResultChar, DuelResult
-from tests.helpers import make_result
+from domain.model.result import DuelResult
+from tests.helpers import make_duel_result
 
 
 @mark.parametrize(
     "results",
     [(
-        make_result(
-            FirstOrSecond.FIRST,
-            ResultChar.WIN,
-            opponent_deck_name=NonEmptyStr("DECK_1")
-        ),
-        make_result(
-            FirstOrSecond.FIRST,
-            ResultChar.WIN,
-            opponent_deck_name=NonEmptyStr("DECK_1")
-        ),
-        make_result(
-            FirstOrSecond.FIRST,
-            ResultChar.WIN,
-            opponent_deck_name=NonEmptyStr("DECK_1")
-        ),
-        make_result(
-            FirstOrSecond.FIRST,
-            ResultChar.WIN,
-            opponent_deck_name=NonEmptyStr("DECK_2")
-        ),
-        make_result(
-            FirstOrSecond.FIRST,
-            ResultChar.WIN,
-            opponent_deck_name=NonEmptyStr("DECK_2")
-        ),
-        make_result(
-            FirstOrSecond.FIRST,
-            ResultChar.WIN,
-            opponent_deck_name=NonEmptyStr("DECK_3")
-        ),
-        make_result(
-            FirstOrSecond.FIRST,
-            ResultChar.WIN,
-            opponent_deck_name=NonEmptyStr("DECK_4")
-        )
+        make_duel_result(opponent_deck_name="DECK_1"),
+        make_duel_result(opponent_deck_name="DECK_1"),
+        make_duel_result(opponent_deck_name="DECK_1"),
+        make_duel_result(opponent_deck_name="DECK_2"),
+        make_duel_result(opponent_deck_name="DECK_2"),
+        make_duel_result(opponent_deck_name="DECK_3"),
+        make_duel_result(opponent_deck_name="DECK_4")
     )]
 )
 def test_deck_distribution(results: Sequence[DuelResult]):

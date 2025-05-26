@@ -8,7 +8,7 @@ from uuid import UUID
 from domain.model.result import DuelResult, FirstOrSecond, ResultChar
 from domain.repository.result.exception import RepositoryDataError
 from domain.repository.result import (
-    FetchResultQuery,
+    SearchResultsQuery,
     ResultQueryRepository
 )
 from domain.shared.unit import NonEmptyStr
@@ -24,7 +24,7 @@ from . import SearchConditionBuilder
 class SQLiteResultQueryRepository(ResultQueryRepository):
     @inject
     def __init__(self, builder: SearchConditionBuilder):
-        self._logger = getLogger()
+        self._logger = getLogger(__name__)
         self._builder = builder
 
     def _row_to_result(self, row: Row) -> DuelResult:
@@ -84,7 +84,7 @@ class SQLiteResultQueryRepository(ResultQueryRepository):
 
         return self._row_to_result(row)
 
-    def search(self, query: FetchResultQuery) -> tuple[DuelResult]:
+    def search(self, query: SearchResultsQuery) -> tuple[DuelResult]:
         result_id_qualified = make_qualified_column(
             ResultTableConfig.TABLE_NAME,
             ResultTableConfig.COLUMN_NAMES.ID

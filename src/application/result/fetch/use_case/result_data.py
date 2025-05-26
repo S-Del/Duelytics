@@ -3,7 +3,7 @@ from typing import Literal
 
 
 @dataclass(frozen=True)
-class FetchResultData:
+class ResultData:
     id: str
     registered_at: str
     first_or_second: Literal["先攻", "後攻"]

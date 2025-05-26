@@ -1,2 +1,5 @@
-class InvalidCommandError(Exception):
+from . import ApplicationError
+
+
+class InvalidCommandError(ApplicationError):
     pass

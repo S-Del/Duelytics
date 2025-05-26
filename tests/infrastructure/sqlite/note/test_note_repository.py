@@ -3,7 +3,6 @@ from uuid import  uuid4
 from pytest import fixture
 
 from domain.model.note import Note
-from domain.model.result import FirstOrSecond, ResultChar
 from infrastructure.sqlite.config import DatabaseConfig
 from infrastructure.sqlite.config.table import NoteTableConfig
 from infrastructure.sqlite.result import SQLiteResultCommandRepository
@@ -11,7 +10,7 @@ from infrastructure.sqlite.note import (
     SQLiteNoteCommandRepository, SQLiteNoteQueryRepository
 )
 from infrastructure.sqlite.unit_of_work import SQLiteUnitOfWork
-from tests.helpers import expect_uow_rollback_on_error, make_result
+from tests.helpers import expect_uow_rollback_on_error, make_duel_result
 
 
 def delete_all():
@@ -80,7 +79,7 @@ def test_crud_flow(
     assert len(notes) == 0
 
     # 試合結果が存在すれば登録できるか検証
-    result = make_result(FirstOrSecond.FIRST, ResultChar.WIN)
+    result = make_duel_result(first_or_second_char='F', result_char='W')
     with uow:
         result_command_repository.register(result)
     with uow:
@@ -105,7 +104,7 @@ def test_crud_flow(
     assert updated_note.content == "Updated"
 
     # 試合結果は存在するが、まだメモは存在しない状態で登録できるか検証。
-    new_result = make_result(FirstOrSecond.SECOND, ResultChar.LOSS)
+    new_result = make_duel_result(first_or_second_char='S', result_char='L')
     with uow:
         result_command_repository.register(new_result)
     note = note_query_repository.search_by_id(new_result.id_raw)

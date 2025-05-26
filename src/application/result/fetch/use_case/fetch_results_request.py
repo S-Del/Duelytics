@@ -1,7 +1,7 @@
 from typing import Literal, TypedDict, Sequence
 
 
-class FetchResultRequest(TypedDict, total=False):
+class FetchResultsRequest(TypedDict, total=False):
     id: str
     first_or_second: Sequence[Literal['F', 'S']]
     result: Sequence[Literal['W', 'L', 'D']]

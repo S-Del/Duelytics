@@ -10,31 +10,33 @@ class RecordFactory:
     """複数の試合結果 (DuelResult) から、戦績を集計するクラス"""
 
     def __init__(self, results: Sequence[DuelResult]):
-        self.first_or_second_counter = Counter(
+        self._first_or_second_counter = Counter(
             duel.first_or_second for duel in results
         )
-        self.result_counter = Counter(
+        self._result_counter = Counter(
             duel.result for duel in results
         )
-        self.result_with_side_counter = Counter(
+        self._result_with_side_counter = Counter(
             (duel.first_or_second, duel.result) for duel in results
         )
 
     def create(self) -> Record:
         """集計された戦績を Record として返す"""
         return Record(
-            NonNegativeInt(self.first_or_second_counter[FirstOrSecond.FIRST]),
-            NonNegativeInt(self.first_or_second_counter[FirstOrSecond.SECOND]),
-            NonNegativeInt(self.result_counter[ResultChar.WIN]),
-            NonNegativeInt(self.result_counter[ResultChar.LOSS]),
-            NonNegativeInt(self.result_counter[ResultChar.DRAW]),
+            NonNegativeInt(self._first_or_second_counter[FirstOrSecond.FIRST]),
             NonNegativeInt(
-                self.result_with_side_counter[
+                self._first_or_second_counter[FirstOrSecond.SECOND]
+            ),
+            NonNegativeInt(self._result_counter[ResultChar.WIN]),
+            NonNegativeInt(self._result_counter[ResultChar.LOSS]),
+            NonNegativeInt(self._result_counter[ResultChar.DRAW]),
+            NonNegativeInt(
+                self._result_with_side_counter[
                     (FirstOrSecond.FIRST, ResultChar.WIN)
                 ]
             ),
             NonNegativeInt(
-                self.result_with_side_counter[
+                self._result_with_side_counter[
                     (FirstOrSecond.SECOND, ResultChar.WIN)
                 ]
             )

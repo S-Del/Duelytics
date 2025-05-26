@@ -10,7 +10,7 @@ from infrastructure.sqlite.config.table import NoteTableConfig
 
 class SQLiteNoteQueryRepository(NoteQueryRepository):
     def __init__(self):
-        self._logger = getLogger()
+        self._logger = getLogger(__name__)
 
     def search_by_id(self, id: UUID) -> Note | None:
         sql = " ".join([

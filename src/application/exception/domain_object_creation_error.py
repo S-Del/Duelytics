@@ -1,2 +1,5 @@
-class DomainObjectCreationError(Exception):
+from . import ApplicationError
+
+
+class DomainObjectCreationError(ApplicationError):
     pass

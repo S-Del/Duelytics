@@ -9,7 +9,7 @@ from infrastructure.sqlite.config.table import (
 )
 
 
-logger = getLogger()
+logger = getLogger(__name__)
 
 
 def create_database():

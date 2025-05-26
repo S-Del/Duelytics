@@ -3,11 +3,11 @@ from uuid import UUID
 
 from injector import inject
 
+from application.services import UnitOfWork
 from domain.model.result import DuelResult
 from domain.repository.result import (
     ResultCommandRepository, UpdateResultCommand
 )
-from domain.repository import UnitOfWork
 from infrastructure.sqlite import SQLiteUnitOfWork
 from infrastructure.sqlite.config.table import ResultTableConfig
 
@@ -18,11 +18,7 @@ class SQLiteResultCommandRepository(ResultCommandRepository):
         if not isinstance(uow, SQLiteUnitOfWork):
             raise TypeError(f"UnitOfWork の型が不正: {uow}")
         self._uow = uow
-        self._logger = getLogger()
-
-    @property
-    def uow(self) -> SQLiteUnitOfWork:
-        return self._uow
+        self._logger = getLogger(__name__)
 
     def register(self, result: DuelResult):
         sql = " ".join([
@@ -42,7 +38,7 @@ class SQLiteResultCommandRepository(ResultCommandRepository):
             f"\tsql: {sql}",
             f"\tparams: {params}"
         ]))
-        connection = self.uow.get_sqlite_connection()
+        connection = self._uow.get_sqlite_connection()
         connection.execute(sql, params)
 
     def update(self, command: UpdateResultCommand):
@@ -68,7 +64,7 @@ class SQLiteResultCommandRepository(ResultCommandRepository):
             f"\tsql: {sql}",
             f"\tparams: {params}"
         ]))
-        connection = self.uow.get_sqlite_connection()
+        connection = self._uow.get_sqlite_connection()
         cursor = connection.cursor()
         cursor.execute(sql, params)
 
@@ -83,5 +79,5 @@ class SQLiteResultCommandRepository(ResultCommandRepository):
             f"\tsql: {sql}",
             f"\tparam: {param}"
         ]))
-        connection = self.uow.get_sqlite_connection()
+        connection = self._uow.get_sqlite_connection()
         connection.execute(sql, param)

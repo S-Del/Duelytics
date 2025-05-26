@@ -17,12 +17,12 @@ class WinRateTrend:
     """
 
     def __init__(self, results: Sequence[DuelResult]):
-        self.results = tuple(results)
+        self._results = tuple(results)
 
     def aggregate(self) -> tuple[Percentage, ...]:
         win_count = 0
         win_rate_trend: list[Percentage] = []
-        for game_count, result in enumerate(self.results, 1):
+        for game_count, result in enumerate(self._results, 1):
             if result.result == ResultChar.WIN:
                 win_count += 1
             win_rate_trend.append(

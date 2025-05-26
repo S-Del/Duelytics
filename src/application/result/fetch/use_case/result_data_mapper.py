@@ -2,12 +2,12 @@ from typing import Sequence
 
 from application.result import FirstOrSecondJP, ResultStringJP
 from domain.model.result.duel_result import DuelResult
-from . import FetchResultData
+from . import ResultData
 
 
 class ResultDataMapper:
-    def to_data(self, result: DuelResult) -> FetchResultData:
-        return FetchResultData(
+    def to_data(self, result: DuelResult) -> ResultData:
+        return ResultData(
             result.id,
             result.registered_at.strftime("%Y-%m-%d %H:%M:%S"),
             FirstOrSecondJP[result.first_or_second.value].value,
@@ -21,5 +21,5 @@ class ResultDataMapper:
 
     def to_data_list(self,
         results: Sequence[DuelResult]
-    ) -> list[FetchResultData]:
+    ) -> list[ResultData]:
         return [self.to_data(result) for result in results]

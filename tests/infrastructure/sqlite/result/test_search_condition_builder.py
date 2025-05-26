@@ -3,7 +3,7 @@ from typing import Any
 from pytest import mark, raises
 
 from domain.model.result import FirstOrSecond, ResultChar
-from domain.repository.result import FetchResultQuery
+from domain.repository.result import SearchResultsQuery
 from domain.shared.unit import NonEmptyStr
 from infrastructure.sqlite.config.table import ResultTableConfig
 from infrastructure.sqlite.result import SearchType, SearchConditionBuilder
@@ -78,7 +78,7 @@ def test_excape_like_param_invalid_search_type(search_type):
     )]
 )
 def test_search_condition_builder(
-    query: FetchResultQuery,
+    query: SearchResultsQuery,
     expected_where: str,
     expected_params: list[Any]
 ):
