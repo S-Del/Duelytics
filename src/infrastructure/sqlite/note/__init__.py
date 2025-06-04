@@ -1,2 +1,0 @@
-from .note_command_repository import SQLiteNoteCommandRepository
-from .note_query_repository import SQLiteNoteQueryRepository

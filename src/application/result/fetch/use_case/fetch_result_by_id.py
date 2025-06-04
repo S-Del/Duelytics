@@ -27,7 +27,7 @@ class FetchResultById:
         try:
             result = self._repository.search_by_id(id_for_result.uuid)
         except SQLiteError as e:
-            self._logger.warning(f"データベースエラー: {e}")
+            self._logger.critical(f"データベースエラー: {e}")
             raise ApplicationCriticalError from e
 
         if not result:

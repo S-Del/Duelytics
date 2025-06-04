@@ -5,11 +5,9 @@ from injector import inject
 
 from application.services import UnitOfWork
 from domain.model.result import DuelResult
-from domain.repository.result import (
-    ResultCommandRepository, UpdateResultCommand
-)
+from domain.repository.result import ResultCommandRepository
 from infrastructure.sqlite import SQLiteUnitOfWork
-from infrastructure.sqlite.config.table import ResultTableConfig
+from infrastructure.sqlite.config import ResultSchema, MemoSchema
 
 
 class SQLiteResultCommandRepository(ResultCommandRepository):
@@ -21,13 +19,23 @@ class SQLiteResultCommandRepository(ResultCommandRepository):
         self._logger = getLogger(__name__)
 
     def register(self, result: DuelResult):
-        sql = " ".join([
-            f"INSERT INTO {ResultTableConfig.TABLE_NAME}",
-            "VALUES (?, ?, ?, ?, ?, ?)"
+        connection = self._uow.get_sqlite_connection()
+        result_id_str = str(result.id)
+        results_sql = " ".join([
+            f"INSERT INTO {ResultSchema.TABLE_NAME} (",
+            ", ".join([
+                ResultSchema.Columns.ID,
+                ResultSchema.Columns.REGISTERED_AT,
+                ResultSchema.Columns.FIRST_OR_SECOND,
+                ResultSchema.Columns.RESULT,
+                ResultSchema.Columns.MY_DECK_NAME,
+                ResultSchema.Columns.OPPONENT_DECK_NAME,
+            ]),
+            ") VALUES (?, ?, ?, ?, ?, ?);"
         ])
-        params = (
-            result.id,
-            result.registered_at_isoformat,
+        results_params = (
+            result_id_str,
+            result.registered_at.isoformat(timespec="seconds"),
             result.first_or_second.value,
             result.result.value,
             result.my_deck_name.value,
@@ -35,49 +43,98 @@ class SQLiteResultCommandRepository(ResultCommandRepository):
         )
         self._logger.debug("\n".join([
             "register()",
-            f"\tsql: {sql}",
-            f"\tparams: {params}"
+            f"\tSQL: {results_sql}",
+            f"\tParams: {results_params}"
         ]))
-        connection = self._uow.get_sqlite_connection()
-        connection.execute(sql, params)
+        connection.execute(results_sql, results_params)
 
-    def update(self, command: UpdateResultCommand):
-        sql = " ".join([
-            f"UPDATE {ResultTableConfig.TABLE_NAME} SET",
-            ", ".join([
-                f"{ResultTableConfig.COLUMN_NAMES.FIRST_OR_SECOND} = ?",
-                f"{ResultTableConfig.COLUMN_NAMES.RESULT} = ?",
-                f"{ResultTableConfig.COLUMN_NAMES.MY_DECK_NAME} = ?",
-                f"{ResultTableConfig.COLUMN_NAMES.OPPONENT_DECK_NAME} = ?",
+        if not result.memo:
+            return
+        memos_sql = " ".join([
+            f"INSERT INTO {MemoSchema.TABLE_NAME} (",
+            ",".join([
+                MemoSchema.Columns.RESULT_ID,
+                MemoSchema.Columns.CONTENT
             ]),
-            f"WHERE {ResultTableConfig.COLUMN_NAMES.ID} = ?"
+            ") VALUES (?, ?);"
         ])
-        params = (
-            command.first_or_second.value,
-            command.result.value,
-            command.my_deck_name,
-            command.opponent_deck_name,
-            str(command.id)
+        memos_params = (result_id_str, result.memo.value)
+        self._logger.debug("\n".join(["",
+            f"\tSQL: {memos_sql}",
+            f"\tParams: {memos_params}"
+        ]))
+        connection.execute(memos_sql, memos_params)
+
+    def update(self, result: DuelResult):
+        connection = self._uow.get_sqlite_connection()
+        result_id_str = str(result.id)
+        results_sql = " ".join([
+            f"UPDATE {ResultSchema.TABLE_NAME} SET",
+            ", ".join([
+                f"{ResultSchema.Columns.FIRST_OR_SECOND} = ?",
+                f"{ResultSchema.Columns.RESULT} = ?",
+                f"{ResultSchema.Columns.MY_DECK_NAME} = ?",
+                f"{ResultSchema.Columns.OPPONENT_DECK_NAME} = ?"
+            ]),
+            f"WHERE {ResultSchema.Columns.ID} = ?;"
+        ])
+        results_params = (
+            result.first_or_second.value,
+            result.result.value,
+            result.my_deck_name.value,
+            result.opponent_deck_name.value,
+            result_id_str
         )
         self._logger.debug("\n".join([
             "update()",
-            f"\tsql: {sql}",
-            f"\tparams: {params}"
+            f"\tSQL: {results_sql}",
+            f"\tParams: {results_params}"
         ]))
-        connection = self._uow.get_sqlite_connection()
-        cursor = connection.cursor()
-        cursor.execute(sql, params)
+        connection.execute(results_sql, results_params)
+
+        # 渡された result にメモが無かった場合は削除
+        if not result.memo:
+            memos_delete_sql = " ".join([
+                f"DELETE FROM {MemoSchema.TABLE_NAME}",
+                f"WHERE {MemoSchema.Columns.RESULT_ID} = ?;"
+            ])
+            memos_params = (result_id_str,)
+            self._logger.debug("\n"
+                f"\tSQL: {memos_delete_sql}\n"
+                f"\tParams: {memos_params}"
+            )
+            connection.execute(memos_delete_sql, memos_params)
+            return
+
+        # 渡された result にメモが存在している場合は UPSERT
+        memos_upsert_sql = " ".join([
+            f"INSERT INTO {MemoSchema.TABLE_NAME} (",
+            ",".join([
+                MemoSchema.Columns.RESULT_ID,
+                MemoSchema.Columns.CONTENT
+            ]),
+            ") VALUES (?, ?)",
+            f"ON CONFLICT({MemoSchema.Columns.RESULT_ID})",
+            f"DO UPDATE SET {MemoSchema.Columns.CONTENT}",
+            f"= excluded.{MemoSchema.Columns.CONTENT};"
+        ])
+        memos_params = (result_id_str, result.memo.value)
+        self._logger.debug("\n"
+            f"\tSQL: {memos_upsert_sql}\n"
+            f"\tParams: {memos_params}"
+        )
+        connection.execute(memos_upsert_sql, memos_params)
 
     def delete_by_id(self, id: UUID):
         sql = " ".join([
-            f"DELETE FROM {ResultTableConfig.TABLE_NAME}",
-            f"WHERE {ResultTableConfig.COLUMN_NAMES.ID} = ?"
+            f"DELETE FROM {ResultSchema.TABLE_NAME}",
+            f"WHERE {ResultSchema.Columns.ID} = ?"
         ])
         param = (str(id),)
         self._logger.debug("\n".join([
             "delete_by_id()",
-            f"\tsql: {sql}",
-            f"\tparam: {param}"
+            f"\tSQL: {sql}",
+            f"\tParam: {param}"
         ]))
         connection = self._uow.get_sqlite_connection()
         connection.execute(sql, param)

@@ -11,5 +11,5 @@ class ResultQueryRepository(ABC):
         pass
 
     @abstractmethod
-    def search(self, query: SearchResultsQuery) -> tuple[DuelResult]:
+    def search(self, query: SearchResultsQuery) -> tuple[DuelResult, ...]:
         pass

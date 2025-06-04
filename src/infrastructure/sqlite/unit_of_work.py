@@ -1,27 +1,39 @@
+from injector import inject
 from logging import getLogger
 from sqlite3 import connect, Connection
 from types import TracebackType
 
+from application.exception import ApplicationCriticalError
 from application.services import UnitOfWork
-from infrastructure.sqlite.config import DatabaseConfig
+from infrastructure.sqlite.config import DatabaseFilePath
 
 
 class SQLiteUnitOfWork(UnitOfWork):
-    def __init__(self):
-        self._db_path = DatabaseConfig.DATABASE_NAME
+    @inject
+    def __init__(self, db_path: DatabaseFilePath):
+        self._db_path = db_path
         self._conn: Connection | None = None
         self._transaction_depth = 0
         self._logger = getLogger(__name__)
 
     def __enter__(self) -> "SQLiteUnitOfWork":
         if self._transaction_depth == 0:
-            self._logger.debug("新しいコネクションを作成")
+            if not self._db_path.exists():
+                msg = f"データベースファイル ({self._db_path}) が存在しない"
+                self._logger.critical(msg)
+                raise ApplicationCriticalError(msg)
+            self._logger.debug(
+                "新しいコネクションを作成 (トランザクション開始): "
+                f"{self._db_path}"
+            )
             self._conn = connect(self._db_path)
             command = "PRAGMA foreign_keys = ON"
             self._logger.debug(f'外部キー制約を有効化: "{command}"')
             self._conn.execute(command)
         self._transaction_depth += 1
-        self._logger.debug(f"transaction depth: {self._transaction_depth}")
+        self._logger.debug(
+            f"トランザクション深度 (ネスト): {self._transaction_depth}"
+        )
 
         return self
 
@@ -31,7 +43,9 @@ class SQLiteUnitOfWork(UnitOfWork):
         _: TracebackType | None
     ) -> bool | None:
         self._transaction_depth -= 1
-        self._logger.debug(f"transaction depth: {self._transaction_depth}")
+        self._logger.debug(
+            f"トランザクション深度 (ネスト) -1: {self._transaction_depth}"
+        )
 
         if self._transaction_depth == 0 and self._conn:
             try:
