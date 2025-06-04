@@ -8,7 +8,7 @@ from . import ResultData
 class ResultDataMapper:
     def to_data(self, result: DuelResult) -> ResultData:
         return ResultData(
-            result.id,
+            str(result.id),
             result.registered_at.strftime("%Y-%m-%d %H:%M:%S"),
             FirstOrSecondJP[result.first_or_second.value].value,
             result.first_or_second.value,
@@ -16,7 +16,7 @@ class ResultDataMapper:
             result.result.value,
             result.my_deck_name.value,
             result.opponent_deck_name.value,
-            result.note or ""
+            result.memo.value if result.memo else ""
         )
 
     def to_data_list(self,

@@ -2,7 +2,7 @@ from datetime import date, datetime, time
 from typing import Any, Literal, Sequence
 
 from domain.repository.result import SearchResultsQuery
-from infrastructure.sqlite.config.table import ResultTableConfig
+from infrastructure.sqlite.config import ResultSchema
 
 
 SearchType = Literal["exact", "partial", "prefix", "suffix"]
@@ -82,21 +82,21 @@ class SearchConditionBuilder:
         first_or_second = query.get("first_or_second")
         if first_or_second:
             self.add_in(
-                ResultTableConfig.COLUMN_NAMES.FIRST_OR_SECOND,
+                ResultSchema.Columns.FIRST_OR_SECOND,
                 [char.value for char in first_or_second]
             )
 
         result = query.get("result")
         if result:
             self.add_in(
-                ResultTableConfig.COLUMN_NAMES.RESULT,
+                ResultSchema.Columns.RESULT,
                 [char.value for char in result]
             )
 
         my_deck_name = query.get("my_deck_name")
         if my_deck_name:
             self.add_like(
-                ResultTableConfig.COLUMN_NAMES.MY_DECK_NAME,
+                ResultSchema.Columns.MY_DECK_NAME,
                 my_deck_name.value,
                 query.get("my_deck_name_search_type") or "exact"
             )
@@ -104,24 +104,18 @@ class SearchConditionBuilder:
         opponent_deck_name = query.get("opponent_deck_name")
         if opponent_deck_name:
             self.add_like(
-                ResultTableConfig.COLUMN_NAMES.OPPONENT_DECK_NAME,
+                ResultSchema.Columns.OPPONENT_DECK_NAME,
                 opponent_deck_name.value,
                 query.get("opponent_deck_name_search_type") or "exact"
             )
 
         since = query.get("since")
         if since:
-            self.add_since(
-                ResultTableConfig.COLUMN_NAMES.REGISTER_DATE,
-                since
-            )
+            self.add_since(ResultSchema.Columns.REGISTERED_AT, since)
 
         until = query.get("until")
         if until:
-            self.add_until(
-                ResultTableConfig.COLUMN_NAMES.REGISTER_DATE,
-                until
-            )
+            self.add_until(ResultSchema.Columns.REGISTERED_AT, until)
 
         if not self._conditions:
             return ("", [])

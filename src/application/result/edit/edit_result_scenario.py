@@ -11,11 +11,10 @@ from application.exception import (
 )
 from application.services import UnitOfWork
 from domain.model.result import FirstOrSecond, ResultChar
-from domain.model.note import Note
-from domain.repository.note import NoteCommandRepository, NoteQueryRepository
 from domain.repository.result import (
-    UpdateResultCommand, ResultCommandRepository
+    ResultCommandRepository, ResultQueryRepository
 )
+from domain.shared.unit import NonEmptyStr
 from . import EditResultCommand
 
 
@@ -23,49 +22,43 @@ class EditResultScenario:
     @inject
     def __init__(self,
         uow: UnitOfWork,
-        result_repository: ResultCommandRepository,
-        note_command_repository: NoteCommandRepository,
-        note_query_repository: NoteQueryRepository,
-        register_deck: RegisterDeckIfNotExists
+        query_repository: ResultQueryRepository,
+        command_repository: ResultCommandRepository,
+        register_deck: RegisterDeckIfNotExists,
     ):
         self._uow = uow
-        self._result_repository = result_repository
-        self._note_command_repository = note_command_repository
-        self._note_query_repository = note_query_repository
+        self._query_repository = query_repository
+        self._command_repository = command_repository
         self._register_deck = register_deck
         self._logger = getLogger(__name__)
 
-    def handle(self, command: EditResultCommand):
+    def execute(self, command: EditResultCommand):
+        try:
+            duel_result = self._query_repository.search_by_id(UUID(command.id))
+        except SQLiteError as se:
+            self._logger.critical(f"データベースエラー: {se}")
+            raise ApplicationCriticalError from se
+        if not duel_result:
+            message = f"存在するはずの試合結果が見つからなかった"
+            self._logger.critical(message)
+            raise ApplicationCriticalError(message)
+
         self._logger.info("試合結果の編集を開始")
         try:
-            update_command = UpdateResultCommand(
-                UUID(command.id),
-                FirstOrSecond(command.first_or_second),
-                ResultChar(command.result),
-                command.my_deck_name,
-                command.opponent_deck_name
+            edited_result = duel_result.update(
+                first_or_second=FirstOrSecond(command.first_or_second),
+                result=ResultChar(command.result),
+                my_deck_name=NonEmptyStr(command.my_deck_name),
+                opponent_deck_name=NonEmptyStr(command.opponent_deck_name),
+                memo=NonEmptyStr(command.memo) if command.memo else None
             )
         except (ValueError, TypeError) as e:
             message = f"更新用データベース命令オブジェクトの作成に失敗: {e}"
             raise DomainObjectCreationError(message) from e
 
         try:
-            src_note = self._note_query_repository.search_by_id(
-                update_command.id
-            )
-
             with self._uow:
-                self._result_repository.update(update_command)
-                # メモの入力があったら upsert
-                if command.note:
-                    self._note_command_repository.upsert(
-                        Note(update_command.id, command.note)
-                    )
-                # メモの入力が無いのに、元のノートが存在する場合は削除。
-                if command.note is None and src_note is not None:
-                    self._note_command_repository.delete_by_id(
-                        update_command.id
-                    )
+                self._command_repository.update(edited_result)
         except SQLiteError as se:
             self._logger.critical(f"データベースエラー: {se}")
             raise ApplicationCriticalError from se

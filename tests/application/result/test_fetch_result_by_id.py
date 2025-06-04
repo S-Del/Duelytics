@@ -23,7 +23,7 @@ def test_fetch_result_by_id_success(
     cast(
         MagicMock, result_query_repository_mock.search_by_id
     ).assert_called_once_with(raw_id)
-    assert result_data.id == duel_result_dummy.id
+    assert result_data.id == str(duel_result_dummy.id)
     assert (
         result_data.first_or_second_raw
         == duel_result_dummy.first_or_second.value

@@ -19,8 +19,3 @@ def escape_like_param(
         return f"%{escaped}"
 
     raise ValueError(f"検索条件の指定が不正: {search_type}")
-
-
-def make_qualified_column(table_name: str, column_name: str) -> str:
-    """「テーブル名.カラム名」の文字列を返す"""
-    return f"{table_name}.{column_name}"

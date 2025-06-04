@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 
 from domain.model.result import DuelResult
-from domain.repository.result import UpdateResultCommand
 
 
 class ResultCommandRepository(ABC):
@@ -11,7 +10,7 @@ class ResultCommandRepository(ABC):
         pass
 
     @abstractmethod
-    def update(self, command: UpdateResultCommand):
+    def update(self, result: DuelResult):
         pass
 
     @abstractmethod

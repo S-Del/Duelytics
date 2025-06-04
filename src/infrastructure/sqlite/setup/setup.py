@@ -1,21 +1,18 @@
 from logging import getLogger
-from os.path import exists
 from sqlite3 import connect, Error as SQLiteError
 
-from infrastructure.sqlite.config import DatabaseConfig
-from infrastructure.sqlite.config.table import (
-    ResultTableConfig,
-    NoteTableConfig
+from infrastructure.sqlite.config import (
+    DatabaseFilePath, ResultSchema, MemoSchema
 )
 
 
 logger = getLogger(__name__)
 
 
-def create_database():
-    logger.info("データベースが存在しない為作成します")
+def create_database(path: DatabaseFilePath):
+    logger.info(f"データベースが存在しないため作成を開始: {path}")
     try:
-        with connect(DatabaseConfig.DATABASE_NAME):
+        with connect(path):
             pass
     except SQLiteError as e:
         logger.error(f"データベース作成エラー: {e}")
@@ -23,33 +20,31 @@ def create_database():
     logger.info("データベース作成完了")
 
 
-def create_result_table():
+def create_result_table(path: DatabaseFilePath):
     sql = " ".join([
-        f"CREATE TABLE IF NOT EXISTS {ResultTableConfig.TABLE_NAME} (",
-        ResultTableConfig.COLUMN_NAMES.ID,
+        f"CREATE TABLE IF NOT EXISTS {ResultSchema.TABLE_NAME} (",
+        ResultSchema.Columns.ID,
         "TEXT UNIQUE NOT NULL PRIMARY KEY",
-        f"CHECK ({ResultTableConfig.COLUMN_NAMES.ID} <> ''),",
-        ResultTableConfig.COLUMN_NAMES.REGISTER_DATE,
+        f"CHECK ({ResultSchema.Columns.ID} <> ''),",
+        ResultSchema.Columns.REGISTERED_AT,
         "TEXT NOT NULL",
-        f"CHECK ({ResultTableConfig.COLUMN_NAMES.REGISTER_DATE} <> ''),",
-        ResultTableConfig.COLUMN_NAMES.FIRST_OR_SECOND,
+        f"CHECK ({ResultSchema.Columns.REGISTERED_AT} <> ''),",
+        ResultSchema.Columns.FIRST_OR_SECOND,
         "TEXT NOT NULL",
-        f"CHECK ({ResultTableConfig.COLUMN_NAMES.FIRST_OR_SECOND} <> ''),",
-        ResultTableConfig.COLUMN_NAMES.RESULT,
+        f"CHECK ({ResultSchema.Columns.FIRST_OR_SECOND} <> ''),",
+        ResultSchema.Columns.RESULT,
         "TEXT NOT NULL",
-        f"CHECK ({ResultTableConfig.COLUMN_NAMES.RESULT} <> ''),",
-        ResultTableConfig.COLUMN_NAMES.MY_DECK_NAME,
+        f"CHECK ({ResultSchema.Columns.RESULT} <> ''),",
+        ResultSchema.Columns.MY_DECK_NAME,
         "TEXT NOT NULL",
-        f"CHECK ({ResultTableConfig.COLUMN_NAMES.MY_DECK_NAME} <> ''),",
-        ResultTableConfig.COLUMN_NAMES.OPPONENT_DECK_NAME,
+        f"CHECK ({ResultSchema.Columns.MY_DECK_NAME} <> ''),",
+        ResultSchema.Columns.OPPONENT_DECK_NAME,
         "TEXT NOT NULL",
-        f"CHECK ({ResultTableConfig.COLUMN_NAMES.OPPONENT_DECK_NAME} <> ''))"
+        f"CHECK ({ResultSchema.Columns.OPPONENT_DECK_NAME} <> ''))"
     ])
-    logger.debug("\n".join([
-        "create_result_table()",
-        f"\tsql: {sql}"
-    ]))
-    with connect(DatabaseConfig.DATABASE_NAME) as conn:
+    logger.info(f"試合結果テーブル作成開始: {ResultSchema.TABLE_NAME}")
+    logger.debug(f"\n\tsql: {sql}")
+    with connect(path) as conn:
         try:
             conn.execute(sql)
         except SQLiteError as e:
@@ -59,14 +54,15 @@ def create_result_table():
 
         sql = " ".join([
             "CREATE INDEX IF NOT EXISTS",
-            ResultTableConfig.INDEX_NAMES.REGISTER_DATE,
-            f"ON {ResultTableConfig.TABLE_NAME}",
-            f"({ResultTableConfig.COLUMN_NAMES.REGISTER_DATE} DESC)"
+            ResultSchema.Indexes.REGISTERED_AT,
+            f"ON {ResultSchema.TABLE_NAME}",
+            f"({ResultSchema.Columns.REGISTERED_AT} DESC)"
         ])
-        logger.debug("\n".join([
-            "インデックスの作成開始"
-            f"\tsql: {sql}"
-        ]))
+        logger.info(
+            "登録日時カラムのインデックス作成開始: "
+            f"{ResultSchema.Indexes.REGISTERED_AT}"
+        )
+        logger.debug(f"\n\tsql: {sql}")
         try:
             conn.execute(sql)
         except SQLiteError as e:
@@ -75,21 +71,22 @@ def create_result_table():
         logger.info("登録日時カラムのインデックス作成完了")
 
 
-def create_note_table():
+def create_memo_table(path: DatabaseFilePath):
     sql = " ".join([
-        f"CREATE TABLE IF NOT EXISTS {NoteTableConfig.TABLE_NAME} (",
-        NoteTableConfig.COLUMN_NAMES.ID,
+        f"CREATE TABLE IF NOT EXISTS {MemoSchema.TABLE_NAME} (",
+        MemoSchema.Columns.RESULT_ID,
         "TEXT UNIQUE NOT NULL PRIMARY KEY",
-        f"CHECK ({NoteTableConfig.COLUMN_NAMES.ID} <> ''),",
-        NoteTableConfig.COLUMN_NAMES.NOTE,
+        f"CHECK ({MemoSchema.Columns.RESULT_ID} <> ''),",
+        MemoSchema.Columns.CONTENT,
         "TEXT NOT NULL",
-        f"CHECK ({NoteTableConfig.COLUMN_NAMES.NOTE} <> ''),",
-        f"FOREIGN KEY ({NoteTableConfig.COLUMN_NAMES.ID})",
-        f"REFERENCES {ResultTableConfig.TABLE_NAME}",
-        f"({ResultTableConfig.COLUMN_NAMES.ID}) ON DELETE CASCADE)"
+        f"CHECK ({MemoSchema.Columns.CONTENT} <> ''),",
+        f"FOREIGN KEY ({MemoSchema.Columns.RESULT_ID})",
+        f"REFERENCES {ResultSchema.TABLE_NAME}",
+        f"({ResultSchema.Columns.ID}) ON DELETE CASCADE)"
     ])
-    logger.debug(f"sql: {sql}")
-    with connect(DatabaseConfig.DATABASE_NAME) as conn:
+    logger.info(f"メモテーブル作成開始: {MemoSchema.TABLE_NAME}")
+    logger.debug(f"\n\tsql: {sql}")
+    with connect(path) as conn:
         try:
             # results テーブルの ID に notes テーブルの ID が紐づく
             conn.execute("PRAGMA foreign_keys = ON;")
@@ -100,11 +97,11 @@ def create_note_table():
     logger.info("メモテーブル作成完了")
 
 
-def init_sqlite():
-    if exists(DatabaseConfig.DATABASE_NAME):
-        logger.info("既にデータベースが存在するため、作成はスキップします。")
+def init_sqlite(path: DatabaseFilePath):
+    if path.exists():
+        logger.info("データベースが存在するため作成をスキップ")
         return
 
-    create_database()
-    create_result_table()
-    create_note_table()
+    create_database(path)
+    create_result_table(path)
+    create_memo_table(path)

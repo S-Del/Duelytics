@@ -7,4 +7,4 @@ def test_duel_result():
     assert result.result.value == 'W'
     assert result.my_deck_name.value == "MY_DECK_NAME"
     assert result.opponent_deck_name.value == "OPPONENT_DECK_NAME"
-    assert result.note == None
+    assert result.memo == None

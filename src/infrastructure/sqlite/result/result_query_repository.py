@@ -12,96 +12,91 @@ from domain.repository.result import (
     ResultQueryRepository
 )
 from domain.shared.unit import NonEmptyStr
-from infrastructure.sqlite.config import DatabaseConfig
-from infrastructure.sqlite.config.table import (
-    ResultTableConfig,
-    NoteTableConfig
+from infrastructure.sqlite.config import (
+    DatabaseFilePath, ResultSchema, MemoSchema
 )
-from infrastructure.sqlite.utils import make_qualified_column
 from . import SearchConditionBuilder
 
 
 class SQLiteResultQueryRepository(ResultQueryRepository):
     @inject
-    def __init__(self, builder: SearchConditionBuilder):
-        self._logger = getLogger(__name__)
+    def __init__(self,
+        db_path: DatabaseFilePath,
+        builder: SearchConditionBuilder
+    ):
+        self._db_path = db_path
         self._builder = builder
+        self._logger = getLogger(__name__)
 
     def _row_to_result(self, row: Row) -> DuelResult:
         try:
+            memo_content_raw = row[MemoSchema.Columns.CONTENT]
+            memo_content: NonEmptyStr | None = None
+            if memo_content_raw:
+                memo_content = NonEmptyStr(memo_content_raw)
+
             return DuelResult(
-                UUID(row[ResultTableConfig.COLUMN_NAMES.ID]),
-                datetime.fromisoformat(row[
-                    ResultTableConfig.COLUMN_NAMES.REGISTER_DATE
+                id=UUID(row[ResultSchema.Columns.ID]),
+                registered_at=datetime.fromisoformat(row[
+                    ResultSchema.Columns.REGISTERED_AT
                 ]),
-                FirstOrSecond(row[
-                    ResultTableConfig.COLUMN_NAMES.FIRST_OR_SECOND
-                ]),
-                ResultChar(row[ResultTableConfig.COLUMN_NAMES.RESULT]),
-                NonEmptyStr(row[ResultTableConfig.COLUMN_NAMES.MY_DECK_NAME]),
-                NonEmptyStr(
-                    row[ResultTableConfig.COLUMN_NAMES.OPPONENT_DECK_NAME]
+                first_or_second=FirstOrSecond(
+                    row[ResultSchema.Columns.FIRST_OR_SECOND]
                 ),
-                row[NoteTableConfig.COLUMN_NAMES.NOTE]
+                result=ResultChar(row[ResultSchema.Columns.RESULT]),
+                my_deck_name=NonEmptyStr(
+                    row[ResultSchema.Columns.MY_DECK_NAME]
+                ),
+                opponent_deck_name=NonEmptyStr(
+                    row[ResultSchema.Columns.OPPONENT_DECK_NAME]
+                ),
+                memo=memo_content
             )
         except (KeyError, TypeError, ValueError) as e:
-            self._logger.critical(
-                f"リポジトリのデータ不整合: {e}",
-                exc_info=True
-            )
-            raise RepositoryDataError from e
+            msg = f"データベースからのマッピング中にエラー: {e} > {dict(row)}"
+            self._logger.critical(msg, exc_info=True)
+            raise RepositoryDataError(msg) from e
 
     def search_by_id(self, id: UUID) -> DuelResult | None:
-        result_id_qualified = make_qualified_column(
-            ResultTableConfig.TABLE_NAME,
-            ResultTableConfig.COLUMN_NAMES.ID
-        )
-        note_id_qualified = make_qualified_column(
-            NoteTableConfig.TABLE_NAME,
-            NoteTableConfig.COLUMN_NAMES.ID
-        )
+        id_str = str(id)
         sql = " ".join([
-            f"SELECT * FROM {ResultTableConfig.TABLE_NAME}",
-            f"LEFT JOIN {NoteTableConfig.TABLE_NAME}",
-            f"ON {result_id_qualified} = {note_id_qualified}",
-            f"WHERE {result_id_qualified} = ?"
+            "SELECT r.*,",
+            f"m.{MemoSchema.Columns.CONTENT} AS {MemoSchema.Columns.CONTENT}",
+            f"FROM {ResultSchema.TABLE_NAME} AS r",
+            f"LEFT JOIN {MemoSchema.TABLE_NAME} AS m",
+            f"ON r.{ResultSchema.Columns.ID}",
+            f"= m.{MemoSchema.Columns.RESULT_ID}",
+            f"WHERE r.{ResultSchema.Columns.ID} = ?"
         ])
+        param = (id_str,)
         self._logger.debug("\n".join([
             f"search_by_id()",
-            f"\tsql: {sql}",
-            f"\tparam: {id}"
+            f"\tSQL: {sql}",
+            f"\tParam: {id_str}"
         ]))
 
-        with connect(DatabaseConfig.DATABASE_NAME) as conn:
+        with connect(self._db_path) as conn:
             conn.row_factory = Row
             cursor = conn.cursor()
-            cursor.execute(sql, (str(id),))
+            cursor.execute(sql, param)
             data = cursor.fetchone()
 
         if data is None:
             return
-        row = cast(Row, data)
 
-        return self._row_to_result(row)
+        return self._row_to_result(cast(Row, data))
 
-    def search(self, query: SearchResultsQuery) -> tuple[DuelResult]:
-        result_id_qualified = make_qualified_column(
-            ResultTableConfig.TABLE_NAME,
-            ResultTableConfig.COLUMN_NAMES.ID
-        )
-        note_id_qualified = make_qualified_column(
-            NoteTableConfig.TABLE_NAME,
-            NoteTableConfig.COLUMN_NAMES.ID
-        )
-
+    def search(self, query: SearchResultsQuery) -> tuple[DuelResult, ...]:
         where_clause, params = self._builder.build(query)
-
         sql_parts = [
-            f"SELECT * FROM {ResultTableConfig.TABLE_NAME}",
-            f"LEFT JOIN {NoteTableConfig.TABLE_NAME}",
-            f"ON {result_id_qualified} = {note_id_qualified}",
+            "SELECT r.*,",
+            f"m.{MemoSchema.Columns.CONTENT} AS {MemoSchema.Columns.CONTENT}",
+            f"FROM {ResultSchema.TABLE_NAME} AS r",
+            f"LEFT JOIN {MemoSchema.TABLE_NAME} AS m",
+            f"ON r.{ResultSchema.Columns.ID}",
+            f"= m.{MemoSchema.Columns.RESULT_ID}",
             where_clause,
-            f"ORDER BY {ResultTableConfig.COLUMN_NAMES.REGISTER_DATE}",
+            f"ORDER BY r.{ResultSchema.Columns.REGISTERED_AT}",
             f"{query.get('order') or 'DESC'}"
         ]
         limit = query.get("limit")
@@ -117,7 +112,7 @@ class SQLiteResultQueryRepository(ResultQueryRepository):
             f"\tparams: {params}"
         ]))
 
-        with connect(DatabaseConfig.DATABASE_NAME) as conn:
+        with connect(self._db_path) as conn:
             conn.row_factory = Row
             cursor = conn.cursor()
             cursor.execute(sql, params)

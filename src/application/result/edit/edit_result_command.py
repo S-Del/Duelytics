@@ -12,7 +12,7 @@ class EditResultCommand:
     result: Literal['W', 'L', 'D']
     my_deck_name: str
     opponent_deck_name: str = "不明"
-    note: str | None = None
+    memo: str | None = None
 
     def __post_init__(self):
         try:
@@ -43,8 +43,8 @@ class EditResultCommand:
 
     def _validate_note(self):
         # 任意の入力項目なので None は許される
-        if self.note is None:
+        if self.memo is None:
             return
         # 入力があるのに、空文字列や空白のみの意味の無い文字列場合は認めない。
-        if not self.note.strip():
-            raise ValueError(f"メモの内容が不正: {self.note}")
+        if not self.memo.strip():
+            raise ValueError(f"メモの内容が不正: {self.memo}")

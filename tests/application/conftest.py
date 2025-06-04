@@ -13,7 +13,6 @@ from application.services.file import IDeckNameFileInitializer
 from domain.repository.deck import (
     DeckNameQueryRepository, DeckNameCommandRepository
 )
-from domain.repository.note import NoteCommandRepository, NoteQueryRepository
 from domain.repository.result import (
     ResultCommandRepository, ResultQueryRepository
 )
@@ -32,16 +31,6 @@ def deck_name_command_repository_mock() -> MagicMock:
 @fixture
 def deck_file_initializer_mock() -> MagicMock:
     return MagicMock(spec=IDeckNameFileInitializer)
-
-
-@fixture
-def note_command_repository_mock() -> MagicMock:
-    return MagicMock(spec=NoteCommandRepository)
-
-
-@fixture
-def note_query_repository_mock() -> MagicMock:
-    return MagicMock(spec=NoteQueryRepository)
 
 
 @fixture
@@ -115,13 +104,11 @@ def fetch_result_with_record(
 def register_result_scenario(
     uow_mock: UnitOfWork,
     result_command_repository_mock: ResultCommandRepository,
-    note_command_repository_mock: NoteCommandRepository,
     register_deck_if_not_exists_mock: RegisterDeckIfNotExists
 ) -> RegisterResultScenario:
     return RegisterResultScenario(
         uow_mock,
         result_command_repository_mock,
-        note_command_repository_mock,
         register_deck_if_not_exists_mock
     )
 
@@ -129,15 +116,13 @@ def register_result_scenario(
 @fixture
 def edit_result_scenario(
     uow_mock: UnitOfWork,
+    result_query_repository_mock: ResultQueryRepository,
     result_command_repository_mock: ResultCommandRepository,
-    note_command_repository_mock: NoteCommandRepository,
-    note_query_repository_mock: NoteQueryRepository,
     register_deck_if_not_exists: RegisterDeckIfNotExists
 ) -> EditResultScenario:
     return EditResultScenario(
         uow_mock,
+        result_query_repository_mock,
         result_command_repository_mock,
-        note_command_repository_mock,
-        note_query_repository_mock,
         register_deck_if_not_exists
     )

@@ -71,7 +71,7 @@ class EditDialog(QDialog):
 
     def on_click_accept_button(self):
         try:
-            self._edit_result.handle(
+            self._edit_result.execute(
                 EditResultCommand(
                     self._target.id,
                     self._first_or_second_group.value,

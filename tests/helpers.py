@@ -16,16 +16,16 @@ def make_duel_result(
     result_char: Literal['W', 'L', 'D'] = 'W',
     my_deck_name: str = "MY_DECK_NAME",
     opponent_deck_name: str = "OPPONENT_DECK_NAME",
-    note: str | None = None
+    memo: str | None = None
 ) -> DuelResult:
     return DuelResult(
-        id or uuid4(),
-        registered_at or datetime.now(),
-        FirstOrSecond(first_or_second_char),
-        ResultChar(result_char),
-        NonEmptyStr(my_deck_name),
-        NonEmptyStr(opponent_deck_name),
-        note
+        id = id or uuid4(),
+        registered_at=registered_at or datetime.now(),
+        first_or_second=FirstOrSecond(first_or_second_char),
+        result=ResultChar(result_char),
+        my_deck_name=NonEmptyStr(my_deck_name),
+        opponent_deck_name=NonEmptyStr(opponent_deck_name),
+        memo=NonEmptyStr(memo) if memo else None
     )
 
 
