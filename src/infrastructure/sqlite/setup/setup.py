@@ -21,6 +21,7 @@ def create_database(path: DatabaseFilePath):
 
 
 def create_result_table(path: DatabaseFilePath):
+    registered_at_format = '%Y-%m-%dT%H:%M:%S'
     sql = " ".join([
         f"CREATE TABLE IF NOT EXISTS {ResultSchema.TABLE_NAME} (",
         ResultSchema.Columns.ID,
@@ -28,7 +29,9 @@ def create_result_table(path: DatabaseFilePath):
         f"CHECK ({ResultSchema.Columns.ID} <> ''),",
         ResultSchema.Columns.REGISTERED_AT,
         "TEXT NOT NULL",
-        f"CHECK ({ResultSchema.Columns.REGISTERED_AT} <> ''),",
+        f"CHECK (strftime('{registered_at_format}',",
+        f"{ResultSchema.Columns.REGISTERED_AT})",
+        f"= {ResultSchema.Columns.REGISTERED_AT}),",
         ResultSchema.Columns.FIRST_OR_SECOND,
         "TEXT NOT NULL",
         f"CHECK ({ResultSchema.Columns.FIRST_OR_SECOND} <> ''),",
