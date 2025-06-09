@@ -1,7 +1,9 @@
 from datetime import date, datetime, time
+from injector import inject
 from typing import Any, Literal, Sequence
 
 from domain.repository.result import SearchResultsQuery
+from infrastructure.sqlite import ReferenceData
 from infrastructure.sqlite.config import ResultSchema
 
 
@@ -9,7 +11,9 @@ SearchType = Literal["exact", "partial", "prefix", "suffix"]
 
 
 class SearchConditionBuilder:
-    def __init__(self):
+    @inject
+    def __init__(self, reference_data: ReferenceData):
+        self._reference_data = reference_data
         self._conditions: list[str] = []
         self._params: list[Any] = []
 
@@ -33,7 +37,7 @@ class SearchConditionBuilder:
 
     def add_in(self,
         column_name: str,
-        values: Sequence[str]
+        values: Sequence[str | int]
     ) -> "SearchConditionBuilder":
         if not values:
             return self
@@ -82,15 +86,21 @@ class SearchConditionBuilder:
         first_or_second = query.get("first_or_second")
         if first_or_second:
             self.add_in(
-                ResultSchema.Columns.FIRST_OR_SECOND,
-                [char.value for char in first_or_second]
+                ResultSchema.Columns.FIRST_OR_SECOND_TYPE_ID,
+                [
+                    self._reference_data.first_or_second_code_to_id[char.value]
+                    for char in first_or_second
+                ]
             )
 
         result = query.get("result")
         if result:
             self.add_in(
-                ResultSchema.Columns.RESULT,
-                [char.value for char in result]
+                ResultSchema.Columns.RESULT_TYPE_ID,
+                [
+                    self._reference_data.result_char_code_to_id[char.value]
+                    for char in result
+                ]
             )
 
         my_deck_name = query.get("my_deck_name")

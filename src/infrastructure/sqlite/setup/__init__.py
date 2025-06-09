@@ -1,1 +1,1 @@
-from .setup import init_sqlite
+from .setup import apply_migrations, create_reference_data

@@ -1,21 +1,21 @@
+from injector import inject
 from logging import getLogger
 from uuid import UUID
-
-from injector import inject
 
 from application.services import UnitOfWork
 from domain.model.result import DuelResult
 from domain.repository.result import ResultCommandRepository
-from infrastructure.sqlite import SQLiteUnitOfWork
+from infrastructure.sqlite import SQLiteUnitOfWork, ReferenceData
 from infrastructure.sqlite.config import ResultSchema, MemoSchema
 
 
 class SQLiteResultCommandRepository(ResultCommandRepository):
     @inject
-    def __init__(self, uow: UnitOfWork):
+    def __init__(self, uow: UnitOfWork, reference_data: ReferenceData):
         if not isinstance(uow, SQLiteUnitOfWork):
             raise TypeError(f"UnitOfWork の型が不正: {uow}")
         self._uow = uow
+        self._reference_data = reference_data
         self._logger = getLogger(__name__)
 
     def register(self, result: DuelResult):
@@ -26,8 +26,8 @@ class SQLiteResultCommandRepository(ResultCommandRepository):
             ", ".join([
                 ResultSchema.Columns.ID,
                 ResultSchema.Columns.REGISTERED_AT,
-                ResultSchema.Columns.FIRST_OR_SECOND,
-                ResultSchema.Columns.RESULT,
+                ResultSchema.Columns.FIRST_OR_SECOND_TYPE_ID,
+                ResultSchema.Columns.RESULT_TYPE_ID,
                 ResultSchema.Columns.MY_DECK_NAME,
                 ResultSchema.Columns.OPPONENT_DECK_NAME,
             ]),
@@ -36,8 +36,10 @@ class SQLiteResultCommandRepository(ResultCommandRepository):
         results_params = (
             result_id_str,
             result.registered_at.isoformat(timespec="seconds"),
-            result.first_or_second.value,
-            result.result.value,
+            self._reference_data.first_or_second_code_to_id[
+                result.first_or_second.value
+            ],
+            self._reference_data.result_char_code_to_id[result.result.value],
             result.my_deck_name.value,
             result.opponent_deck_name.value
         )
@@ -71,16 +73,18 @@ class SQLiteResultCommandRepository(ResultCommandRepository):
         results_sql = " ".join([
             f"UPDATE {ResultSchema.TABLE_NAME} SET",
             ", ".join([
-                f"{ResultSchema.Columns.FIRST_OR_SECOND} = ?",
-                f"{ResultSchema.Columns.RESULT} = ?",
+                f"{ResultSchema.Columns.FIRST_OR_SECOND_TYPE_ID} = ?",
+                f"{ResultSchema.Columns.RESULT_TYPE_ID} = ?",
                 f"{ResultSchema.Columns.MY_DECK_NAME} = ?",
                 f"{ResultSchema.Columns.OPPONENT_DECK_NAME} = ?"
             ]),
             f"WHERE {ResultSchema.Columns.ID} = ?;"
         ])
         results_params = (
-            result.first_or_second.value,
-            result.result.value,
+            self._reference_data.first_or_second_code_to_id[
+                result.first_or_second.value
+            ],
+            self._reference_data.result_char_code_to_id[result.result.value],
             result.my_deck_name.value,
             result.opponent_deck_name.value,
             result_id_str

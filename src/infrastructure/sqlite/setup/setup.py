@@ -1,110 +1,139 @@
 from logging import getLogger
-from sqlite3 import connect, Error as SQLiteError
+from sqlite3 import connect, Connection, Error, OperationalError
 
+from infrastructure.sqlite import ReferenceData
 from infrastructure.sqlite.config import (
-    DatabaseFilePath, ResultSchema, MemoSchema
+    DatabaseFilePath, FirstOrSecondTypesSchema, ResultTypesSchema
 )
+from infrastructure.sqlite.migrations.registry import MIGRATIONS
 
 
 logger = getLogger(__name__)
 
 
-def create_database(path: DatabaseFilePath):
-    logger.info(f"データベースが存在しないため作成を開始: {path}")
+def _get_current_version(conn: Connection) -> int:
+    """現在のデータベースのバージョンを取得する。
+
+    バージョン管理テーブルがなければ作成する。
+    """
     try:
-        with connect(path):
-            pass
-    except SQLiteError as e:
-        logger.error(f"データベース作成エラー: {e}")
-        raise
-    logger.info("データベース作成完了")
-
-
-def create_result_table(path: DatabaseFilePath):
-    registered_at_format = '%Y-%m-%dT%H:%M:%S'
-    sql = " ".join([
-        f"CREATE TABLE IF NOT EXISTS {ResultSchema.TABLE_NAME} (",
-        ResultSchema.Columns.ID,
-        "TEXT UNIQUE NOT NULL PRIMARY KEY",
-        f"CHECK ({ResultSchema.Columns.ID} <> ''),",
-        ResultSchema.Columns.REGISTERED_AT,
-        "TEXT NOT NULL",
-        f"CHECK (strftime('{registered_at_format}',",
-        f"{ResultSchema.Columns.REGISTERED_AT})",
-        f"= {ResultSchema.Columns.REGISTERED_AT}),",
-        ResultSchema.Columns.FIRST_OR_SECOND,
-        "TEXT NOT NULL",
-        f"CHECK ({ResultSchema.Columns.FIRST_OR_SECOND} <> ''),",
-        ResultSchema.Columns.RESULT,
-        "TEXT NOT NULL",
-        f"CHECK ({ResultSchema.Columns.RESULT} <> ''),",
-        ResultSchema.Columns.MY_DECK_NAME,
-        "TEXT NOT NULL",
-        f"CHECK ({ResultSchema.Columns.MY_DECK_NAME} <> ''),",
-        ResultSchema.Columns.OPPONENT_DECK_NAME,
-        "TEXT NOT NULL",
-        f"CHECK ({ResultSchema.Columns.OPPONENT_DECK_NAME} <> ''))"
-    ])
-    logger.info(f"試合結果テーブル作成開始: {ResultSchema.TABLE_NAME}")
-    logger.debug(f"\n\tsql: {sql}")
-    with connect(path) as conn:
-        try:
-            conn.execute(sql)
-        except SQLiteError as e:
-            logger.error(f"試合結果テーブル作成失敗: {e}")
-            raise
-        logger.info("試合結果テーブル作成完了")
-
-        sql = " ".join([
-            "CREATE INDEX IF NOT EXISTS",
-            ResultSchema.Indexes.REGISTERED_AT,
-            f"ON {ResultSchema.TABLE_NAME}",
-            f"({ResultSchema.Columns.REGISTERED_AT} DESC)"
-        ])
+        cursor = conn.execute("SELECT version FROM _schema_version LIMIT 1")
+        row = cursor.fetchone()
+        return row[0] if row else 0
+    except OperationalError:
         logger.info(
-            "登録日時カラムのインデックス作成開始: "
-            f"{ResultSchema.Indexes.REGISTERED_AT}"
+            "バージョン管理テーブル (_schema_version) が見つからないため、"
+            "新規作成します。"
         )
-        logger.debug(f"\n\tsql: {sql}")
-        try:
-            conn.execute(sql)
-        except SQLiteError as e:
-            logger.error(f"インデックスの作成に失敗: {e}")
-            raise
-        logger.info("登録日時カラムのインデックス作成完了")
+        # バージョン管理テーブルを作成し、初期バージョン0を登録
+        conn.execute("CREATE TABLE _schema_version (version INTEGER NOT NULL)")
+        conn.execute("INSERT INTO _schema_version (version) VALUES (0)")
+        return 0
 
 
-def create_memo_table(path: DatabaseFilePath):
-    sql = " ".join([
-        f"CREATE TABLE IF NOT EXISTS {MemoSchema.TABLE_NAME} (",
-        MemoSchema.Columns.RESULT_ID,
-        "TEXT UNIQUE NOT NULL PRIMARY KEY",
-        f"CHECK ({MemoSchema.Columns.RESULT_ID} <> ''),",
-        MemoSchema.Columns.CONTENT,
-        "TEXT NOT NULL",
-        f"CHECK ({MemoSchema.Columns.CONTENT} <> ''),",
-        f"FOREIGN KEY ({MemoSchema.Columns.RESULT_ID})",
-        f"REFERENCES {ResultSchema.TABLE_NAME}",
-        f"({ResultSchema.Columns.ID}) ON DELETE CASCADE)"
-    ])
-    logger.info(f"メモテーブル作成開始: {MemoSchema.TABLE_NAME}")
-    logger.debug(f"\n\tsql: {sql}")
-    with connect(path) as conn:
-        try:
-            # results テーブルの ID に notes テーブルの ID が紐づく
+def _set_current_version(conn: Connection, version: int):
+    """データベースのバージョンを設定する"""
+    conn.execute("UPDATE _schema_version SET version = ?", (version,))
+
+
+def apply_migrations(db_path: DatabaseFilePath):
+    """自作のマイグレーションシステムを適用する"""
+    logger.info("データベースマイグレーションの確認と適用を開始します。")
+    logger.info(f"対象データベース: {db_path}")
+
+    try:
+        with connect(db_path) as conn:
             conn.execute("PRAGMA foreign_keys = ON;")
-            conn.execute(sql)
-        except SQLiteError as e:
-            logger.error(f"メモテーブル作成失敗: {e}")
-            raise
-    logger.info("メモテーブル作成完了")
+            current_version = _get_current_version(conn)
+            logger.info(f"現在のデータベースバージョン: {current_version}")
+
+            # 適用すべきマイグレーションを特定
+            # MIGRATIONSリストの、current_version番目以降のスライスを取得
+            migrations_to_apply = MIGRATIONS[current_version:]
+
+            if not migrations_to_apply:
+                logger.info("適用する新しいマイグレーションはありません。")
+                return
+
+            new_version_start = current_version + 1
+            target_version_list = list(
+                range(
+                    new_version_start,
+                    new_version_start + len(migrations_to_apply)
+                )
+            )
+            logger.info(f"適用対象のバージョン: {target_version_list}")
+
+            # enumerateを使って、新しいバージョン番号とマイグレーションモジュールを取得
+            for version, migration in enumerate(
+                migrations_to_apply,
+                start=new_version_start
+            ):
+                logger.info(
+                    f"バージョン {version} のマイグレーションを適用します..."
+                )
+                conn.executescript(migration.SQL)
+                _set_current_version(conn, version)
+                logger.info(f"バージョン {version} を適用しました。")
+
+            logger.info("データベースマイグレーションが正常に完了しました。")
+    except Error as e:
+        logger.critical(
+            f"データベースマイグレーション中にエラーが発生しました: {e}",
+            exc_info=True
+        )
+        raise
 
 
-def init_sqlite(path: DatabaseFilePath):
-    if path.exists():
-        logger.info("データベースが存在するため作成をスキップ")
-        return
+def create_reference_data(db_path: DatabaseFilePath) -> ReferenceData:
+    """参照テーブルからマッピングデータを読み込み、ReferenceDataを生成する。"""
+    logger.info("参照データの読み込みを開始します。")
+    try:
+        # withステートメントで接続を管理し、処理が終わると自動で閉じる
+        with connect(db_path) as conn:
+            cursor = conn.cursor()
 
-    create_database(path)
-    create_result_table(path)
-    create_memo_table(path)
+            # FirstOrSecond のマッピングを作成
+            cursor.execute(
+                f"SELECT id, code FROM {FirstOrSecondTypesSchema.TABLE_NAME}"
+            )
+            first_or_second_rows = cursor.fetchall()
+            first_or_second_code_to_id = {
+                row[1]: row[0] for row in first_or_second_rows
+            }
+            first_or_second_id_to_code = {
+                row[0]: row[1] for row in first_or_second_rows
+            }
+            logger.debug(
+                "FirstOrSecond マッピング完了\n"
+                f"\tcode to id: {first_or_second_code_to_id}\n"
+                f"\tid to code: {first_or_second_id_to_code}"
+            )
+
+            # ResultChar のマッピングを作成
+            cursor.execute(
+                f"SELECT id, code FROM {ResultTypesSchema.TABLE_NAME}"
+            )
+            result_rows = cursor.fetchall()
+            result_char_code_to_id = {row[1]: row[0] for row in result_rows}
+            result_char_id_to_code = {row[0]: row[1] for row in result_rows}
+            logger.debug(
+                "ResultChar マッピング完了\n"
+                f"\tcode to id: {result_char_code_to_id}\n"
+                f"\tid to code: {result_char_id_to_code}"
+            )
+
+            reference_data = ReferenceData(
+                first_or_second_code_to_id=first_or_second_code_to_id,
+                first_or_second_id_to_code=first_or_second_id_to_code,
+                result_char_code_to_id=result_char_code_to_id,
+                result_char_id_to_code=result_char_id_to_code
+            )
+            logger.info("参照データの読み込みが完了しました。")
+            return reference_data
+    except Error as e:
+        logger.critical(
+            f"参照データの読み込み中にエラーが発生しました: {e}",
+            exc_info=True
+        )
+        raise

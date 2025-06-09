@@ -2,14 +2,14 @@ from pathlib import Path
 from pytest import fixture
 
 from infrastructure.file.deck import DeckNameFileParser
-from infrastructure.sqlite import SQLiteUnitOfWork
+from infrastructure.sqlite import SQLiteUnitOfWork, ReferenceData
 from infrastructure.sqlite.config import DatabaseFilePath
 from infrastructure.sqlite.result import (
     SearchConditionBuilder,
     SQLiteResultCommandRepository,
     SQLiteResultQueryRepository
 )
-from infrastructure.sqlite.setup import init_sqlite
+from infrastructure.sqlite.setup import apply_migrations, create_reference_data
 
 
 @fixture
@@ -32,9 +32,14 @@ def temp_database_file_path(tmp_path: Path) -> DatabaseFilePath:
 def db_with_schema(
     temp_database_file_path: DatabaseFilePath
 ) -> DatabaseFilePath:
-    init_sqlite(temp_database_file_path)
+    apply_migrations(temp_database_file_path)
     initialized_db_path = temp_database_file_path
     return initialized_db_path
+
+
+@fixture(scope="function")
+def reference_data(db_with_schema: DatabaseFilePath) -> ReferenceData:
+    return create_reference_data(db_with_schema)
 
 
 @fixture
@@ -43,18 +48,19 @@ def uow(db_with_schema) -> SQLiteUnitOfWork:
 
 
 @fixture
-def builder():
-    return SearchConditionBuilder()
+def builder(reference_data: ReferenceData):
+    return SearchConditionBuilder(reference_data)
 
 
 @fixture
-def command_repository(uow):
-    return SQLiteResultCommandRepository(uow)
+def command_repository(uow: SQLiteUnitOfWork, reference_data: ReferenceData):
+    return SQLiteResultCommandRepository(uow, reference_data)
 
 
 @fixture
 def query_repository(
     db_with_schema: DatabaseFilePath,
+    reference_data: ReferenceData,
     builder: SearchConditionBuilder
 ) -> SQLiteResultQueryRepository:
-    return SQLiteResultQueryRepository(db_with_schema, builder)
+    return SQLiteResultQueryRepository(db_with_schema, reference_data, builder)

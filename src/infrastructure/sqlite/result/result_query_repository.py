@@ -6,12 +6,10 @@ from typing import cast
 from uuid import UUID
 
 from domain.model.result import DuelResult, FirstOrSecond, ResultChar
+from domain.repository.result import SearchResultsQuery, ResultQueryRepository
 from domain.repository.result.exception import RepositoryDataError
-from domain.repository.result import (
-    SearchResultsQuery,
-    ResultQueryRepository
-)
 from domain.shared.unit import NonEmptyStr
+from infrastructure.sqlite import ReferenceData
 from infrastructure.sqlite.config import (
     DatabaseFilePath, ResultSchema, MemoSchema
 )
@@ -22,9 +20,11 @@ class SQLiteResultQueryRepository(ResultQueryRepository):
     @inject
     def __init__(self,
         db_path: DatabaseFilePath,
+        reference_data: ReferenceData,
         builder: SearchConditionBuilder
     ):
         self._db_path = db_path
+        self._reference_data = reference_data
         self._builder = builder
         self._logger = getLogger(__name__)
 
@@ -41,9 +41,15 @@ class SQLiteResultQueryRepository(ResultQueryRepository):
                     ResultSchema.Columns.REGISTERED_AT
                 ]),
                 first_or_second=FirstOrSecond(
-                    row[ResultSchema.Columns.FIRST_OR_SECOND]
+                    self._reference_data.first_or_second_id_to_code[
+                        row[ResultSchema.Columns.FIRST_OR_SECOND_TYPE_ID]
+                    ]
                 ),
-                result=ResultChar(row[ResultSchema.Columns.RESULT]),
+                result=ResultChar(
+                    self._reference_data.result_char_id_to_code[
+                        row[ResultSchema.Columns.RESULT_TYPE_ID]
+                    ]
+                ),
                 my_deck_name=NonEmptyStr(
                     row[ResultSchema.Columns.MY_DECK_NAME]
                 ),

@@ -42,13 +42,13 @@ def test_excape_like_param_invalid_search_type(search_type):
 @mark.parametrize(
     ("query", "expected_where", "expected_params"),
     [(
-        {"first_or_second": [FirstOrSecond('F'), FirstOrSecond('S')]},
-        f" WHERE {ResultSchema.Columns.FIRST_OR_SECOND} IN (?, ?)",
-        ['F', 'S']
+        {"first_or_second": [FirstOrSecond.FIRST, FirstOrSecond.SECOND]},
+        f" WHERE {ResultSchema.Columns.FIRST_OR_SECOND_TYPE_ID} IN (?, ?)",
+        [1, 2]
     ), (
-        {"result": [ResultChar('W'), ResultChar('L'), ResultChar('D')]},
-        f" WHERE {ResultSchema.Columns.RESULT} IN (?, ?, ?)",
-        ['W', 'L', 'D']
+        {"result": [ResultChar.WIN, ResultChar.LOSS, ResultChar.DRAW]},
+        f" WHERE {ResultSchema.Columns.RESULT_TYPE_ID} IN (?, ?, ?)",
+        [1, 2, 3]
     ), (
         {"my_deck_name": NonEmptyStr("MY_DECK_NAME")},
         f" WHERE {ResultSchema.Columns.MY_DECK_NAME}"
@@ -78,10 +78,11 @@ def test_excape_like_param_invalid_search_type(search_type):
     )]
 )
 def test_search_condition_builder(
+    builder: SearchConditionBuilder,
     query: SearchResultsQuery,
     expected_where: str,
     expected_params: list[Any]
 ):
-    where_clause, params = SearchConditionBuilder().build(query)
+    where_clause, params = builder.build(query)
     assert where_clause == expected_where
     assert params == expected_params

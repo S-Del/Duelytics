@@ -8,7 +8,7 @@ from domain.repository.result import SearchResultsQuery
 from domain.shared.unit import NonEmptyStr, PositiveInt
 from infrastructure.sqlite import SQLiteUnitOfWork
 from infrastructure.sqlite.config import DatabaseFilePath
-from infrastructure.sqlite.config.duel_result_schema import MemoSchema
+from infrastructure.sqlite.config.schema import MemoSchema
 from infrastructure.sqlite.result import (
     SQLiteResultCommandRepository, SQLiteResultQueryRepository
 )
